@@ -203,7 +203,6 @@ VITE_SUPABASE_ANON_KEY=${anonKey}`,
 
 function generatePassword(length) {
     const password = crypto
-        // eslint-disable-next-line no-undef
         .getRandomValues(new BigUint64Array(4))
         .reduce(
             (prev, curr, index) =>

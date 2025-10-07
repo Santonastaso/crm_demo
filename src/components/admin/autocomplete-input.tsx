@@ -125,8 +125,7 @@ export const AutocompleteInput = (
       setOpen(false);
     },
     [
-      field.value,
-      field.onChange,
+      field,
       getChoiceValue,
       isRequired,
       setFilterValue,
