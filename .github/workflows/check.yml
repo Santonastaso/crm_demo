@@ -1,8 +1,9 @@
 name: ✅ Check
 on:
-    push:
-        branches:
-            - main
+    # Disabled - now handled by deploy.yml
+    # push:
+    #     branches:
+    #         - main
     pull_request:
         types:
             - opened
