@@ -17,6 +17,8 @@ import {
 } from "../providers/supabase";
 import sales from "../sales";
 import { SettingsPage } from "../settings/SettingsPage";
+import { ActivityLogPage } from "../activity/ActivityLogPage";
+import { WorkflowPage } from "../workflows/WorkflowPage";
 import type { ConfigurationContextValue } from "./ConfigurationContext";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import {
@@ -146,6 +148,8 @@ export const CRM = ({
 
         <CustomRoutes>
           <Route path={SettingsPage.path} element={<SettingsPage />} />
+          <Route path={ActivityLogPage.path} element={<ActivityLogPage />} />
+          <Route path={WorkflowPage.path} element={<WorkflowPage />} />
         </CustomRoutes>
         <Resource name="deals" {...deals} />
         <Resource name="contacts" {...contacts} />

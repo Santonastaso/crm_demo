@@ -23,6 +23,8 @@ import { getCompanyAvatar } from "../commons/getCompanyAvatar";
 import { getContactAvatar } from "../commons/getContactAvatar";
 import { getIsInitialized } from "./authProvider";
 import { supabase } from "./supabase";
+import { WorkflowEngine } from "../../workflows/workflowEngine";
+import { workflowStore } from "../../workflows/workflowStore";
 
 if (import.meta.env.VITE_SUPABASE_URL === undefined) {
   throw new Error("Please set the VITE_SUPABASE_URL environment variable");
@@ -313,6 +315,13 @@ export const dataProvider = withLifecycleCallbacks(
       resource: "deals",
       beforeGetList: async (params) => {
         return applyFullTextSearch(["name", "type", "description"])(params);
+      },
+      afterUpdate: async (data: Deal, params) => {
+        // Execute workflows when deal is updated
+        const workflows = workflowStore.getWorkflows();
+        const workflowEngine = new WorkflowEngine(dataProviderWithCustomMethods, workflows);
+        await workflowEngine.executeWorkflows(data, params.previousData);
+        return data;
       },
     },
   ],
