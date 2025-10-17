@@ -24,7 +24,7 @@ interface Timer {
   delay_unit?: string;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (_req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -160,7 +160,7 @@ function calculateNextTrigger(timer: Timer): string | null {
   if (!timer.recurrence_enabled) return null;
 
   const now = new Date();
-  let next = new Date(now);
+  const next = new Date(now);
 
   const interval = timer.recurrence_interval || 1;
 

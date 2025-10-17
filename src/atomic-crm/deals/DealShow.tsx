@@ -54,9 +54,16 @@ export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
 };
 
 const DealShowContent = () => {
-  const { dealStages } = useConfigurationContext();
+  const record = useRecordContext<Deal>();
+  if (!record) return null;
+  return <DealShowContentInner />;
+};
+
+const DealShowContentInner = () => {
+  const { dealStages: _dealStages } = useConfigurationContext();
   const record = useRecordContext<Deal>();
   const [timerDialogOpen, setTimerDialogOpen] = useState(false);
+
   if (!record) return null;
 
   return (
@@ -188,7 +195,7 @@ const DealDetailsTab = () => {
             Stage
           </span>
           <span className="text-sm">
-            {findDealLabel(dealStages, record.stage)}
+            {findDealLabel(_dealStages, record.stage)}
           </span>
         </div>
       </div>

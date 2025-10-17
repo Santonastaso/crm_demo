@@ -1,5 +1,5 @@
 import type { DataProvider } from "ra-core";
-import type { Workflow, Deal, Task } from "../types";
+import type { Workflow, Deal } from "../types";
 
 // Simple workflow engine for MVP
 export class WorkflowEngine {
