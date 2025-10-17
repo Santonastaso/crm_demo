@@ -60,7 +60,6 @@ const DealShowContent = () => {
 };
 
 const DealShowContentInner = () => {
-  const { dealStages: _dealStages } = useConfigurationContext();
   const record = useRecordContext<Deal>();
   const [timerDialogOpen, setTimerDialogOpen] = useState(false);
 
@@ -144,6 +143,7 @@ const DealShowContentInner = () => {
 };
 
 const DealDetailsTab = () => {
+  const { dealStages } = useConfigurationContext();
   const record = useRecordContext<Deal>();
   if (!record) return null;
 
@@ -195,7 +195,7 @@ const DealDetailsTab = () => {
             Stage
           </span>
           <span className="text-sm">
-            {findDealLabel(_dealStages, record.stage)}
+            {findDealLabel(dealStages, record.stage)}
           </span>
         </div>
       </div>
