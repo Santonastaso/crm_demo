@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
-import { Archive, ArchiveRestore } from "lucide-react";
+import { Archive, ArchiveRestore, Bell } from "lucide-react";
+import { useState } from "react";
 import {
   ShowBase,
   useDataProvider,
@@ -22,12 +23,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { NoteCreate, NotesIterator } from "../notes";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
 import { ContactList } from "./ContactList";
 import { findDealLabel } from "./deal";
+import { DealInteractionsTimeline } from "./interactions/DealInteractionsTimeline";
+import { DealDashboard } from "./dashboard/DealDashboard";
+import { TimerCreateDialog } from "../timers/TimerCreateDialog";
 
 export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
   const redirect = useRedirect();
@@ -51,6 +56,7 @@ export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
 const DealShowContent = () => {
   const { dealStages } = useConfigurationContext();
   const record = useRecordContext<Deal>();
+  const [timerDialogOpen, setTimerDialogOpen] = useState(false);
   if (!record) return null;
 
   return (
@@ -58,7 +64,7 @@ const DealShowContent = () => {
       <div className="space-y-2">
         {record.archived_at ? <ArchivedTitle /> : null}
         <div className="flex-1">
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-4">
               <ReferenceField
                 source="company_id"
@@ -77,6 +83,14 @@ const DealShowContent = () => {
                 </>
               ) : (
                 <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTimerDialogOpen(true)}
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Imposta promemoria
+                  </Button>
                   <ArchiveButton record={record} />
                   <EditButton />
                 </>
@@ -84,94 +98,136 @@ const DealShowContent = () => {
             </div>
           </div>
 
-          <div className="flex gap-8 m-4">
-            <div className="flex flex-col mr-10">
-              <span className="text-xs text-muted-foreground tracking-wide">
-                Expected closing date
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">
-                  {isValid(new Date(record.expected_closing_date))
-                    ? format(new Date(record.expected_closing_date), "PP")
-                    : "Invalid date"}
-                </span>
-                {new Date(record.expected_closing_date) < new Date() ? (
-                  <Badge variant="destructive">Past</Badge>
-                ) : null}
-              </div>
-            </div>
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="details">Dettagli</TabsTrigger>
+              <TabsTrigger value="interactions">Interazioni</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            </TabsList>
 
-            <div className="flex flex-col mr-10">
-              <span className="text-xs text-muted-foreground tracking-wide">
-                Budget
-              </span>
-              <span className="text-sm">
-                {record.amount.toLocaleString("en-US", {
-                  notation: "compact",
-                  style: "currency",
-                  currency: "USD",
-                  currencyDisplay: "narrowSymbol",
-                  minimumSignificantDigits: 3,
-                })}
-              </span>
-            </div>
+            <TabsContent value="details" className="mt-0">
+              <DealDetailsTab />
+            </TabsContent>
 
-            {record.category && (
-              <div className="flex flex-col mr-10">
-                <span className="text-xs text-muted-foreground tracking-wide">
-                  Category
-                </span>
-                <span className="text-sm">{record.category}</span>
-              </div>
-            )}
+            <TabsContent value="interactions" className="mt-0">
+              <ReferenceManyField
+                target="deal_id"
+                reference="dealInteractions"
+                sort={{ field: "date", order: "DESC" }}
+              >
+                <DealInteractionsTimeline />
+              </ReferenceManyField>
+            </TabsContent>
 
-            <div className="flex flex-col mr-10">
-              <span className="text-xs text-muted-foreground tracking-wide">
-                Stage
-              </span>
-              <span className="text-sm">
-                {findDealLabel(dealStages, record.stage)}
-              </span>
-            </div>
-          </div>
+            <TabsContent value="dashboard" className="mt-0">
+              <DealDashboard />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
 
-          {!!record.contact_ids?.length && (
-            <div className="m-4">
-              <div className="flex flex-col min-h-12 mr-10">
-                <span className="text-xs text-muted-foreground tracking-wide">
-                  Contacts
-                </span>
-                <ReferenceArrayField
-                  source="contact_ids"
-                  reference="contacts_summary"
-                >
-                  <ContactList />
-                </ReferenceArrayField>
-              </div>
-            </div>
-          )}
+      <TimerCreateDialog
+        open={timerDialogOpen}
+        onClose={() => setTimerDialogOpen(false)}
+        entityType="opportunity"
+        entityId={record.id.toString()}
+      />
+    </>
+  );
+};
 
-          {record.description && (
-            <div className="m-4 whitespace-pre-line">
-              <span className="text-xs text-muted-foreground tracking-wide">
-                Description
-              </span>
-              <p className="text-sm leading-6">{record.description}</p>
-            </div>
-          )}
+const DealDetailsTab = () => {
+  const record = useRecordContext<Deal>();
+  if (!record) return null;
 
-          <div className="m-4">
-            <Separator className="mb-4" />
-            <ReferenceManyField
-              target="deal_id"
-              reference="dealNotes"
-              sort={{ field: "date", order: "DESC" }}
-              empty={<NoteCreate reference={"deals"} />}
-            >
-              <NotesIterator reference="deals" />
-            </ReferenceManyField>
+  return (
+    <>
+      <div className="flex gap-8 m-4">
+        <div className="flex flex-col mr-10">
+          <span className="text-xs text-muted-foreground tracking-wide">
+            Expected closing date
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">
+              {isValid(new Date(record.expected_closing_date))
+                ? format(new Date(record.expected_closing_date), "PP")
+                : "Invalid date"}
+            </span>
+            {new Date(record.expected_closing_date) < new Date() ? (
+              <Badge variant="destructive">Past</Badge>
+            ) : null}
           </div>
         </div>
+
+        <div className="flex flex-col mr-10">
+          <span className="text-xs text-muted-foreground tracking-wide">
+            Budget
+          </span>
+          <span className="text-sm">
+            {record.amount.toLocaleString("en-US", {
+              notation: "compact",
+              style: "currency",
+              currency: "USD",
+              currencyDisplay: "narrowSymbol",
+              minimumSignificantDigits: 3,
+            })}
+          </span>
+        </div>
+
+        {record.category && (
+          <div className="flex flex-col mr-10">
+            <span className="text-xs text-muted-foreground tracking-wide">
+              Category
+            </span>
+            <span className="text-sm">{record.category}</span>
+          </div>
+        )}
+
+        <div className="flex flex-col mr-10">
+          <span className="text-xs text-muted-foreground tracking-wide">
+            Stage
+          </span>
+          <span className="text-sm">
+            {findDealLabel(useConfigurationContext().dealStages, record.stage)}
+          </span>
+        </div>
+      </div>
+
+      {!!record.contact_ids?.length && (
+        <div className="m-4">
+          <div className="flex flex-col min-h-12 mr-10">
+            <span className="text-xs text-muted-foreground tracking-wide">
+              Contacts
+            </span>
+            <ReferenceArrayField
+              source="contact_ids"
+              reference="contacts_summary"
+            >
+              <ContactList />
+            </ReferenceArrayField>
+          </div>
+        </div>
+      )}
+
+      {record.description && (
+        <div className="m-4 whitespace-pre-line">
+          <span className="text-xs text-muted-foreground tracking-wide">
+            Description
+          </span>
+          <p className="text-sm leading-6">{record.description}</p>
+        </div>
+      )}
+
+      <div className="m-4">
+        <Separator className="mb-4" />
+        <ReferenceManyField
+          target="deal_id"
+          reference="dealNotes"
+          sort={{ field: "date", order: "DESC" }}
+          empty={<NoteCreate reference={"deals"} />}
+        >
+          <NotesIterator reference="deals" />
+        </ReferenceManyField>
       </div>
     </>
   );

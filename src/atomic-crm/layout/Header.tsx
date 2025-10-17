@@ -5,6 +5,7 @@ import { Settings, User } from "lucide-react";
 import { CanAccess } from "ra-core";
 import { Link, matchPath, useLocation } from "react-router";
 import { useConfigurationContext } from "../root/ConfigurationContext";
+import { NotificationCenter } from "../notifications/NotificationCenter";
 
 const Header = () => {
   const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
@@ -82,9 +83,10 @@ const Header = () => {
                 />
               </nav>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-1">
               <ThemeModeToggle />
               <RefreshButton />
+              <NotificationCenter />
               <UserMenu>
                 <ConfigurationMenu />
                 <CanAccess resource="sales" action="list">

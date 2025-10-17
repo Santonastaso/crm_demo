@@ -324,6 +324,17 @@ export const dataProvider = withLifecycleCallbacks(
         return data;
       },
     },
+    {
+      resource: "dealInteractions",
+      beforeSave: async (data: any, _, __) => {
+        if (data.attachments) {
+          for (const fi of data.attachments) {
+            await uploadToBucket(fi);
+          }
+        }
+        return data;
+      },
+    },
   ],
 );
 
