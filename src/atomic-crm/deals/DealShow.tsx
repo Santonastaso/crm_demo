@@ -188,7 +188,7 @@ const DealDetailsTab = () => {
             Stage
           </span>
           <span className="text-sm">
-            {findDealLabel(useConfigurationContext().dealStages, record.stage)}
+            {findDealLabel(dealStages, record.stage)}
           </span>
         </div>
       </div>

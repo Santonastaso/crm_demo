@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import type { Deal, DealInteraction } from "../../types";
 import { DealInteractionCreate } from "./DealInteractionCreate";
 
@@ -22,12 +21,6 @@ const interactionIcons = {
   Altro: MoreHorizontal,
 };
 
-const sentimentColors = {
-  Positivo: 'bg-green-500',
-  Neutro: 'bg-gray-500',
-  Negativo: 'bg-orange-500',
-  Critico: 'bg-red-500',
-};
 
 const sentimentVariants = {
   Positivo: 'default' as const,

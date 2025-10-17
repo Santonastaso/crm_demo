@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { WorkflowIcon, Plus, Trash2 } from "lucide-react";
+import { WorkflowIcon, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useGetIdentity } from "ra-core";
 import type { Workflow } from "./types";

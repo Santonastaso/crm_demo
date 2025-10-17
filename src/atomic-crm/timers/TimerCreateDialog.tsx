@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useCreate, useGetIdentity, useGetList, useNotify } from "ra-core";
 import { z } from "zod";

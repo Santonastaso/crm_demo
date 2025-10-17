@@ -5,7 +5,7 @@ import { useGetList, useUpdate, useDelete, useNotify, useGetIdentity } from "ra-
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Timer } from "../types";
 
@@ -24,7 +24,7 @@ const statusColors = {
 };
 
 export const TimersList = () => {
-  const { identity } = useGetIdentity();
+  const { identity: _identity } = useGetIdentity();
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

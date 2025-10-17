@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { Bell, Check, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGetIdentity, useGetList, useUpdate, useRedirect } from "ra-core";
 
 import { Badge } from "@/components/ui/badge";
