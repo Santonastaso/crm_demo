@@ -17,16 +17,22 @@ const stageMultipliers: Record<string, number> = {
 
 export const DealMetricsCards = () => {
   const deal = useRecordContext<Deal>();
-  
-  const { data: interactions } = useGetList<DealInteraction>('dealInteractions', {
-    filter: { deal_id: deal?.id },
-    pagination: { page: 1, perPage: 1000 },
-  });
+
+  const { data: interactions } = useGetList<DealInteraction>(
+    "dealInteractions",
+    {
+      filter: { deal_id: deal?.id },
+      pagination: { page: 1, perPage: 1000 },
+    },
+  );
 
   if (!deal) return null;
 
   const probability = stageMultipliers[deal.stage] || 0;
-  const daysInPipeline = differenceInDays(new Date(), new Date(deal.created_at));
+  const daysInPipeline = differenceInDays(
+    new Date(),
+    new Date(deal.created_at),
+  );
   const interactionsCount = interactions?.length || 0;
 
   return (
@@ -34,7 +40,9 @@ export const DealMetricsCards = () => {
       {/* Deal Value */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valore Opportunità</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Valore Opportunità
+          </CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -55,7 +63,9 @@ export const DealMetricsCards = () => {
       {/* Probability */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Probabilità di Chiusura</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Probabilità di Chiusura
+          </CardTitle>
           <Percent className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -70,7 +80,9 @@ export const DealMetricsCards = () => {
       {/* Days in Pipeline */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Giorni in Pipeline</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Giorni in Pipeline
+          </CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -84,23 +96,24 @@ export const DealMetricsCards = () => {
       {/* Total Interactions */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Interazioni Totali</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Interazioni Totali
+          </CardTitle>
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{interactionsCount}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {interactionsCount === 0 
-              ? 'Nessuna interazione registrata'
-              : `Ultima: ${interactions && interactions.length > 0 
-                  ? new Date(interactions[0].date).toLocaleDateString()
-                  : '-'}`
-            }
+            {interactionsCount === 0
+              ? "Nessuna interazione registrata"
+              : `Ultima: ${
+                  interactions && interactions.length > 0
+                    ? new Date(interactions[0].date).toLocaleDateString()
+                    : "-"
+                }`}
           </p>
         </CardContent>
       </Card>
     </div>
   );
 };
-
-

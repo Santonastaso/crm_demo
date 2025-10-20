@@ -1,12 +1,30 @@
 import { format } from "date-fns";
-import { Calendar, Clock, Mail, MessageSquare, Phone, Presentation, FileText, Handshake, MessageCircle, MoreHorizontal, Download } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Mail,
+  MessageSquare,
+  Phone,
+  Presentation,
+  FileText,
+  Handshake,
+  MessageCircle,
+  MoreHorizontal,
+  Download,
+} from "lucide-react";
 import { useState } from "react";
 import { useListContext, useRecordContext } from "ra-core";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Deal, DealInteraction } from "../../types";
 import { DealInteractionCreate } from "./DealInteractionCreate";
 
@@ -17,34 +35,38 @@ const interactionIcons = {
   Demo: Presentation,
   Proposta: FileText,
   Negoziazione: Handshake,
-  'Follow-up': MessageCircle,
+  "Follow-up": MessageCircle,
   Altro: MoreHorizontal,
 };
 
-
 const sentimentVariants = {
-  Positivo: 'default' as const,
-  Neutro: 'secondary' as const,
-  Negativo: 'outline' as const,
-  Critico: 'destructive' as const,
+  Positivo: "default" as const,
+  Neutro: "secondary" as const,
+  Negativo: "outline" as const,
+  Critico: "destructive" as const,
 };
 
 export const DealInteractionsTimeline = () => {
   const { data, isPending } = useListContext<DealInteraction>();
   const deal = useRecordContext<Deal>();
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [sentimentFilter, setSentimentFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [sentimentFilter, setSentimentFilter] = useState<string>("all");
 
   if (!deal) return null;
 
   const filteredData = data?.filter((interaction) => {
-    if (typeFilter !== 'all' && interaction.type !== typeFilter) return false;
-    if (sentimentFilter !== 'all' && interaction.sentiment !== sentimentFilter) return false;
+    if (typeFilter !== "all" && interaction.type !== typeFilter) return false;
+    if (sentimentFilter !== "all" && interaction.sentiment !== sentimentFilter)
+      return false;
     return true;
   });
 
   if (isPending) {
-    return <div className="text-center py-8 text-muted-foreground">Caricamento...</div>;
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Caricamento...
+      </div>
+    );
   }
 
   return (
@@ -94,7 +116,11 @@ export const DealInteractionsTimeline = () => {
       {filteredData && filteredData.length > 0 ? (
         <div className="space-y-4 mt-6">
           {filteredData.map((interaction, index) => (
-            <InteractionItem key={interaction.id} interaction={interaction} isLast={index === filteredData.length - 1} />
+            <InteractionItem
+              key={interaction.id}
+              interaction={interaction}
+              isLast={index === filteredData.length - 1}
+            />
           ))}
         </div>
       ) : (
@@ -105,9 +131,9 @@ export const DealInteractionsTimeline = () => {
               Nessuna interazione trovata
             </p>
             <p className="text-sm text-muted-foreground mb-4">
-              {typeFilter !== 'all' || sentimentFilter !== 'all' 
-                ? 'Prova a modificare i filtri'
-                : 'Inizia a tracciare le interazioni con il cliente'}
+              {typeFilter !== "all" || sentimentFilter !== "all"
+                ? "Prova a modificare i filtri"
+                : "Inizia a tracciare le interazioni con il cliente"}
             </p>
           </CardContent>
         </Card>
@@ -116,9 +142,15 @@ export const DealInteractionsTimeline = () => {
   );
 };
 
-const InteractionItem = ({ interaction, isLast }: { interaction: DealInteraction; isLast: boolean }) => {
+const InteractionItem = ({
+  interaction,
+  isLast,
+}: {
+  interaction: DealInteraction;
+  isLast: boolean;
+}) => {
   const Icon = interactionIcons[interaction.type] || MoreHorizontal;
-  
+
   return (
     <div className="flex gap-4">
       {/* Timeline indicator */}
@@ -126,7 +158,12 @@ const InteractionItem = ({ interaction, isLast }: { interaction: DealInteraction
         <div className="rounded-full p-2 bg-primary/10">
           <Icon className="h-4 w-4 text-primary" />
         </div>
-        {!isLast && <div className="flex-1 w-0.5 bg-border mt-2" style={{ minHeight: '40px' }} />}
+        {!isLast && (
+          <div
+            className="flex-1 w-0.5 bg-border mt-2"
+            style={{ minHeight: "40px" }}
+          />
+        )}
       </div>
 
       {/* Content */}
@@ -160,7 +197,9 @@ const InteractionItem = ({ interaction, isLast }: { interaction: DealInteraction
 
           {interaction.participants && interaction.participants.length > 0 && (
             <div className="mb-2">
-              <span className="text-sm text-muted-foreground">Partecipanti: </span>
+              <span className="text-sm text-muted-foreground">
+                Partecipanti:{" "}
+              </span>
               <div className="flex gap-1 mt-1 flex-wrap">
                 {interaction.participants.map((participantId) => (
                   <Badge key={participantId} variant="outline">
@@ -181,24 +220,29 @@ const InteractionItem = ({ interaction, isLast }: { interaction: DealInteraction
             <div className="mt-3 space-y-2">
               <span className="text-sm font-medium">Allegati:</span>
               <div className="space-y-1">
-                {interaction.attachments.map((attachment: any, index: number) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <FileText className="h-4 w-4" />
-                    <a
-                      href={attachment.src}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
+                {interaction.attachments.map(
+                  (attachment: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-sm"
                     >
-                      {attachment.title}
-                    </a>
-                    <Button variant="ghost" size="sm" asChild>
-                      <a href={attachment.src} download={attachment.title}>
-                        <Download className="h-3 w-3" />
+                      <FileText className="h-4 w-4" />
+                      <a
+                        href={attachment.src}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {attachment.title}
                       </a>
-                    </Button>
-                  </div>
-                ))}
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href={attachment.src} download={attachment.title}>
+                          <Download className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           )}
@@ -207,5 +251,3 @@ const InteractionItem = ({ interaction, isLast }: { interaction: DealInteraction
     </div>
   );
 };
-
-

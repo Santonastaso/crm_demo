@@ -8,7 +8,8 @@ export class WorkflowEngine {
 
   constructor(dataProvider: DataProvider, workflows: Workflow[] = []) {
     this.dataProvider = dataProvider;
-    this.workflows = workflows.length > 0 ? workflows : this.getDefaultWorkflows();
+    this.workflows =
+      workflows.length > 0 ? workflows : this.getDefaultWorkflows();
   }
 
   private getDefaultWorkflows(): Workflow[] {
@@ -20,18 +21,18 @@ export class WorkflowEngine {
         description: "Automatically create a thank you task when a deal is won",
         trigger: {
           type: "deal_stage_changed",
-          stage: "won"
+          stage: "won",
         },
         action: {
           type: "create_task",
           taskType: "Thank you",
           taskText: "Send thank you message to customer",
-          dueDateOffset: 1
+          dueDateOffset: 1,
         },
         enabled: true,
         created_at: new Date().toISOString(),
-        sales_id: 1
-      }
+        sales_id: 1,
+      },
     ];
   }
 
@@ -47,10 +48,11 @@ export class WorkflowEngine {
     }
 
     // Find matching workflows
-    const matchingWorkflows = this.workflows.filter(workflow => 
-      workflow.enabled &&
-      workflow.trigger.type === "deal_stage_changed" &&
-      workflow.trigger.stage === deal.stage
+    const matchingWorkflows = this.workflows.filter(
+      (workflow) =>
+        workflow.enabled &&
+        workflow.trigger.type === "deal_stage_changed" &&
+        workflow.trigger.stage === deal.stage,
     );
 
     // Execute each matching workflow
@@ -82,8 +84,8 @@ export class WorkflowEngine {
             type: workflow.action.taskType,
             text: workflow.action.taskText,
             due_date: dueDate.toISOString(),
-            sales_id: deal.sales_id
-          }
+            sales_id: deal.sales_id,
+          },
         });
       } catch (error) {
         console.error("Failed to create task from workflow:", error);

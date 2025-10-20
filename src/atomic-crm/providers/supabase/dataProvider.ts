@@ -319,7 +319,10 @@ export const dataProvider = withLifecycleCallbacks(
       afterUpdate: async (data: Deal, params) => {
         // Execute workflows when deal is updated
         const workflows = workflowStore.getWorkflows();
-        const workflowEngine = new WorkflowEngine(dataProviderWithCustomMethods, workflows);
+        const workflowEngine = new WorkflowEngine(
+          dataProviderWithCustomMethods,
+          workflows,
+        );
         await workflowEngine.executeWorkflows(data, params.previousData);
         return data;
       },

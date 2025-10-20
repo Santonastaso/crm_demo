@@ -9,23 +9,26 @@ import type { Deal, DealInteraction } from "../../types";
 
 export const DealInteractionsChart = () => {
   const deal = useRecordContext<Deal>();
-  
-  const { data: interactions, isPending } = useGetList<DealInteraction>('dealInteractions', {
-    filter: { deal_id: deal?.id },
-    pagination: { page: 1, perPage: 1000 },
-    sort: { field: 'date', order: 'ASC' },
-  });
+
+  const { data: interactions, isPending } = useGetList<DealInteraction>(
+    "dealInteractions",
+    {
+      filter: { deal_id: deal?.id },
+      pagination: { page: 1, perPage: 1000 },
+      sort: { field: "date", order: "ASC" },
+    },
+  );
 
   const chartData = useMemo(() => {
     if (!interactions || interactions.length === 0) return [];
 
     // Group interactions by week
     const interactionsByWeek: Record<string, DealInteraction[]> = {};
-    
+
     interactions.forEach((interaction) => {
       const weekStart = startOfWeek(parseISO(interaction.date));
       const weekKey = format(weekStart, "MMM d");
-      
+
       if (!interactionsByWeek[weekKey]) {
         interactionsByWeek[weekKey] = [];
       }
@@ -40,27 +43,27 @@ export const DealInteractionsChart = () => {
   }, [interactions]);
 
   const trend = useMemo(() => {
-    if (chartData.length < 2) return 'stable';
-    
+    if (chartData.length < 2) return "stable";
+
     const recentCount = chartData[chartData.length - 1].count;
     const previousCount = chartData[chartData.length - 2].count;
-    
-    if (recentCount > previousCount) return 'increasing';
-    if (recentCount < previousCount) return 'decreasing';
-    return 'stable';
+
+    if (recentCount > previousCount) return "increasing";
+    if (recentCount < previousCount) return "decreasing";
+    return "stable";
   }, [chartData]);
 
   const inactivityPeriods = useMemo(() => {
     if (!interactions || interactions.length < 2) return [];
-    
+
     const gaps: { start: string; end: string; days: number }[] = [];
-    
+
     for (let i = 1; i < interactions.length; i++) {
       const days = differenceInDays(
         parseISO(interactions[i].date),
-        parseISO(interactions[i - 1].date)
+        parseISO(interactions[i - 1].date),
       );
-      
+
       if (days > 7) {
         gaps.push({
           start: interactions[i - 1].date,
@@ -69,7 +72,7 @@ export const DealInteractionsChart = () => {
         });
       }
     }
-    
+
     return gaps;
   }, [interactions]);
 
@@ -98,7 +101,9 @@ export const DealInteractionsChart = () => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Nessuna interazione da visualizzare</p>
+            <p className="text-muted-foreground">
+              Nessuna interazione da visualizzare
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -111,19 +116,19 @@ export const DealInteractionsChart = () => {
         <CardTitle className="flex items-center justify-between">
           <span>Frequenza Interazioni</span>
           <div className="flex items-center gap-2 text-sm font-normal">
-            {trend === 'increasing' && (
+            {trend === "increasing" && (
               <>
                 <TrendingUp className="h-4 w-4 text-green-500" />
                 <span className="text-green-500">In aumento</span>
               </>
             )}
-            {trend === 'decreasing' && (
+            {trend === "decreasing" && (
               <>
                 <TrendingDown className="h-4 w-4 text-orange-500" />
                 <span className="text-orange-500">In diminuzione</span>
               </>
             )}
-            {trend === 'stable' && (
+            {trend === "stable" && (
               <>
                 <Minus className="h-4 w-4 text-gray-500" />
                 <span className="text-gray-500">Stabile</span>
@@ -136,11 +141,11 @@ export const DealInteractionsChart = () => {
         <div className="h-[300px]">
           <ResponsiveBar
             data={chartData}
-            keys={['count']}
+            keys={["count"]}
             indexBy="week"
             margin={{ top: 20, right: 20, bottom: 50, left: 40 }}
             padding={0.3}
-            colors={['#3b82f6']}
+            colors={["#3b82f6"]}
             borderRadius={4}
             axisTop={null}
             axisRight={null}
@@ -148,16 +153,16 @@ export const DealInteractionsChart = () => {
               tickSize: 5,
               tickPadding: 5,
               tickRotation: -45,
-              legend: 'Settimana',
-              legendPosition: 'middle',
+              legend: "Settimana",
+              legendPosition: "middle",
               legendOffset: 42,
             }}
             axisLeft={{
               tickSize: 5,
               tickPadding: 5,
               tickRotation: 0,
-              legend: 'Numero Interazioni',
-              legendPosition: 'middle',
+              legend: "Numero Interazioni",
+              legendPosition: "middle",
               legendOffset: -35,
             }}
             labelSkipWidth={12}
@@ -192,5 +197,3 @@ export const DealInteractionsChart = () => {
     </Card>
   );
 };
-
-

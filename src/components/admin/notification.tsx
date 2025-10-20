@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useCallback, useEffect } from "react";
 import { Toaster, type ToasterProps, toast } from "sonner";
-import { useTheme } from "@/components/admin/theme-provider";
+import { useTheme } from "@/components/admin/theme-hooks";
 import {
   CloseNotificationContext,
   useNotificationContext,

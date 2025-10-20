@@ -21,10 +21,14 @@ import { Plus } from "lucide-react";
 import type { Workflow } from "./types";
 
 type WorkflowCreateDialogProps = {
-  onCreateWorkflow: (workflow: Omit<Workflow, "id" | "created_at" | "sales_id">) => void;
+  onCreateWorkflow: (
+    workflow: Omit<Workflow, "id" | "created_at" | "sales_id">,
+  ) => void;
 };
 
-export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogProps) => {
+export const WorkflowCreateDialog = ({
+  onCreateWorkflow,
+}: WorkflowCreateDialogProps) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,26 +36,26 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
     triggerStage: "won",
     taskType: "Thank you",
     taskText: "Send thank you message to customer",
-    dueDateOffset: 1
+    dueDateOffset: 1,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newWorkflow = {
       name: formData.name,
       description: formData.description,
       trigger: {
         type: "deal_stage_changed" as const,
-        stage: formData.triggerStage
+        stage: formData.triggerStage,
       },
       action: {
         type: "create_task" as const,
         taskType: formData.taskType,
         taskText: formData.taskText,
-        dueDateOffset: formData.dueDateOffset
+        dueDateOffset: formData.dueDateOffset,
       },
-      enabled: true
+      enabled: true,
     };
 
     onCreateWorkflow(newWorkflow);
@@ -62,7 +66,7 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
       triggerStage: "won",
       taskType: "Thank you",
       taskText: "Send thank you message to customer",
-      dueDateOffset: 1
+      dueDateOffset: 1,
     });
   };
 
@@ -84,7 +88,9 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="e.g., Thank You After Win"
               required
             />
@@ -95,7 +101,9 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Describe what this workflow does"
               required
             />
@@ -108,7 +116,9 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
             </div>
             <Select
               value={formData.triggerStage}
-              onValueChange={(value) => setFormData({ ...formData, triggerStage: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, triggerStage: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -126,12 +136,12 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
 
           <div className="space-y-2">
             <Label>Then</Label>
-            <div className="text-sm text-muted-foreground">
-              Create a task:
-            </div>
+            <div className="text-sm text-muted-foreground">Create a task:</div>
             <Select
               value={formData.taskType}
-              onValueChange={(value) => setFormData({ ...formData, taskType: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, taskType: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -152,7 +162,9 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
             <Input
               id="taskText"
               value={formData.taskText}
-              onChange={(e) => setFormData({ ...formData, taskText: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, taskText: e.target.value })
+              }
               placeholder="What should the task say?"
               required
             />
@@ -165,13 +177,22 @@ export const WorkflowCreateDialog = ({ onCreateWorkflow }: WorkflowCreateDialogP
               type="number"
               min="0"
               value={formData.dueDateOffset}
-              onChange={(e) => setFormData({ ...formData, dueDateOffset: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  dueDateOffset: parseInt(e.target.value) || 0,
+                })
+              }
               required
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Create Workflow</Button>

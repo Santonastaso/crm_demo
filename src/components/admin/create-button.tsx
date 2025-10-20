@@ -1,5 +1,5 @@
 import React from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Plus } from "lucide-react";
 import { Translate, useCreatePath, useResourceContext } from "ra-core";
 import { Link } from "react-router";

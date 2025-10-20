@@ -226,38 +226,46 @@ export interface ContactGender {
 
 export type DealInteraction = {
   deal_id: Identifier;
-  type: 'Email' | 'Chiamata' | 'Meeting' | 'Demo' | 'Proposta' | 'Negoziazione' | 'Follow-up' | 'Altro';
+  type:
+    | "Email"
+    | "Chiamata"
+    | "Meeting"
+    | "Demo"
+    | "Proposta"
+    | "Negoziazione"
+    | "Follow-up"
+    | "Altro";
   date: string;
   duration?: number; // minutes
   participants: Identifier[]; // contact_ids
   notes?: string;
   attachments?: AttachmentNote[];
-  sentiment?: 'Positivo' | 'Neutro' | 'Negativo' | 'Critico';
+  sentiment?: "Positivo" | "Neutro" | "Negativo" | "Critico";
   sales_id: Identifier;
   created_at: string;
 } & Pick<RaRecord, "id">;
 
 export type Timer = {
   id: string;
-  entity_type: 'opportunity' | 'lead' | 'customer' | 'task' | 'proposal';
+  entity_type: "opportunity" | "lead" | "customer" | "task" | "proposal";
   entity_id: string;
-  timer_type: 'relative' | 'absolute';
+  timer_type: "relative" | "absolute";
   trigger_event?: string;
   delay_value?: number;
-  delay_unit?: 'minutes' | 'hours' | 'days' | 'weeks';
+  delay_unit?: "minutes" | "hours" | "days" | "weeks";
   fixed_datetime?: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: "low" | "medium" | "high" | "urgent";
   action_required: string;
   description?: string;
   assigned_to: Identifier;
   notify_also?: Identifier[];
-  channels: ('in_app' | 'email' | 'push')[];
+  channels: ("in_app" | "email" | "push")[];
   recurrence_enabled: boolean;
-  recurrence_pattern?: 'daily' | 'weekly' | 'monthly' | 'custom';
+  recurrence_pattern?: "daily" | "weekly" | "monthly" | "custom";
   recurrence_interval?: number;
-  recurrence_end_condition?: 'never' | 'after_n_times' | 'until_date';
+  recurrence_end_condition?: "never" | "after_n_times" | "until_date";
   recurrence_end_value?: string;
-  status: 'active' | 'paused' | 'expired' | 'completed';
+  status: "active" | "paused" | "expired" | "completed";
   last_triggered?: string;
   next_trigger?: string;
   trigger_count: number;
@@ -270,7 +278,7 @@ export type Notification = {
   user_id: Identifier;
   title: string;
   message: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: "low" | "medium" | "high" | "urgent";
   read: boolean;
   entity_type?: string;
   entity_id?: string;

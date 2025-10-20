@@ -58,7 +58,6 @@ function NavigationMenuItem({
   );
 }
 
-
 function NavigationMenuTrigger({
   className,
   children,

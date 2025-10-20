@@ -1,42 +1,59 @@
 import { format } from "date-fns";
 import { Clock, Pause, Play, CheckCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useGetList, useUpdate, useDelete, useNotify, useGetIdentity } from "ra-core";
+import {
+  useGetList,
+  useUpdate,
+  useDelete,
+  useNotify,
+  useGetIdentity,
+} from "ra-core";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Timer } from "../types";
 
 const priorityColors = {
-  low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  urgent: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  medium:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  urgent: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  paused: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-  completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  expired: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  paused: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  expired: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
 export const TimersList = () => {
   const { identity: _identity } = useGetIdentity();
-  const [statusFilter, setStatusFilter] = useState<string>('active');
-  const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>("active");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
-  const { data: timers, isPending, refetch } = useGetList<Timer>('timers', {
+  const {
+    data: timers,
+    isPending,
+    refetch,
+  } = useGetList<Timer>("timers", {
     filter: {
-      ...(statusFilter !== 'all' && { status: statusFilter }),
-      ...(entityTypeFilter !== 'all' && { entity_type: entityTypeFilter }),
-      ...(priorityFilter !== 'all' && { priority: priorityFilter }),
+      ...(statusFilter !== "all" && { status: statusFilter }),
+      ...(entityTypeFilter !== "all" && { entity_type: entityTypeFilter }),
+      ...(priorityFilter !== "all" && { priority: priorityFilter }),
     },
     pagination: { page: 1, perPage: 100 },
-    sort: { field: 'next_trigger', order: 'ASC' },
+    sort: { field: "next_trigger", order: "ASC" },
   });
 
   if (isPending) {
@@ -112,9 +129,11 @@ export const TimersList = () => {
               Nessun promemoria trovato
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              {statusFilter !== 'all' || entityTypeFilter !== 'all' || priorityFilter !== 'all'
-                ? 'Prova a modificare i filtri'
-                : 'Crea il tuo primo promemoria da un\'opportunità o contatto'}
+              {statusFilter !== "all" ||
+              entityTypeFilter !== "all" ||
+              priorityFilter !== "all"
+                ? "Prova a modificare i filtri"
+                : "Crea il tuo primo promemoria da un'opportunità o contatto"}
             </p>
           </CardContent>
         </Card>
@@ -123,15 +142,21 @@ export const TimersList = () => {
   );
 };
 
-const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) => {
+const TimerCard = ({
+  timer,
+  onUpdate,
+}: {
+  timer: Timer;
+  onUpdate: () => void;
+}) => {
   const [update] = useUpdate();
   const [deleteOne] = useDelete();
   const notify = useNotify();
 
   const handlePauseResume = () => {
-    const newStatus = timer.status === 'active' ? 'paused' : 'active';
+    const newStatus = timer.status === "active" ? "paused" : "active";
     update(
-      'timers',
+      "timers",
       {
         id: timer.id,
         data: { status: newStatus },
@@ -139,50 +164,53 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
       },
       {
         onSuccess: () => {
-          notify(`Timer ${newStatus === 'active' ? 'riattivato' : 'in pausa'}`, { type: 'success' });
+          notify(
+            `Timer ${newStatus === "active" ? "riattivato" : "in pausa"}`,
+            { type: "success" },
+          );
           onUpdate();
         },
         onError: (error) => {
-          notify(`Errore: ${error.message}`, { type: 'error' });
+          notify(`Errore: ${error.message}`, { type: "error" });
         },
-      }
+      },
     );
   };
 
   const handleComplete = () => {
     update(
-      'timers',
+      "timers",
       {
         id: timer.id,
-        data: { status: 'completed' },
+        data: { status: "completed" },
         previousData: timer,
       },
       {
         onSuccess: () => {
-          notify('Timer completato', { type: 'success' });
+          notify("Timer completato", { type: "success" });
           onUpdate();
         },
         onError: (error) => {
-          notify(`Errore: ${error.message}`, { type: 'error' });
+          notify(`Errore: ${error.message}`, { type: "error" });
         },
-      }
+      },
     );
   };
 
   const handleDelete = () => {
-    if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
+    if (confirm("Sei sicuro di voler eliminare questo promemoria?")) {
       deleteOne(
-        'timers',
+        "timers",
         { id: timer.id, previousData: timer },
         {
           onSuccess: () => {
-            notify('Timer eliminato', { type: 'success' });
+            notify("Timer eliminato", { type: "success" });
             onUpdate();
           },
           onError: (error) => {
-            notify(`Errore: ${error.message}`, { type: 'error' });
+            notify(`Errore: ${error.message}`, { type: "error" });
           },
-        }
+        },
       );
     }
   };
@@ -204,16 +232,22 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
               </Badge>
             </div>
 
-            <h3 className="text-lg font-semibold mb-2">{timer.action_required}</h3>
-            
+            <h3 className="text-lg font-semibold mb-2">
+              {timer.action_required}
+            </h3>
+
             {timer.description && (
-              <p className="text-sm text-muted-foreground mb-3">{timer.description}</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                {timer.description}
+              </p>
             )}
 
             <div className="grid grid-cols-2 gap-4 text-sm">
-              {timer.next_trigger && timer.status === 'active' && (
+              {timer.next_trigger && timer.status === "active" && (
                 <div>
-                  <span className="text-muted-foreground">Prossima attivazione:</span>
+                  <span className="text-muted-foreground">
+                    Prossima attivazione:
+                  </span>
                   <span className="ml-2 font-medium">
                     {format(new Date(timer.next_trigger), "PPp")}
                   </span>
@@ -222,7 +256,9 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
 
               {timer.last_triggered && (
                 <div>
-                  <span className="text-muted-foreground">Ultima attivazione:</span>
+                  <span className="text-muted-foreground">
+                    Ultima attivazione:
+                  </span>
                   <span className="ml-2 font-medium">
                     {format(new Date(timer.last_triggered), "PPp")}
                   </span>
@@ -233,7 +269,8 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
                 <div>
                   <span className="text-muted-foreground">Ricorrenza:</span>
                   <span className="ml-2 font-medium">
-                    {timer.recurrence_pattern} (ogni {timer.recurrence_interval})
+                    {timer.recurrence_pattern} (ogni {timer.recurrence_interval}
+                    )
                   </span>
                 </div>
               )}
@@ -246,7 +283,7 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
           </div>
 
           <div className="flex gap-2 ml-4">
-            {timer.status === 'active' && (
+            {timer.status === "active" && (
               <>
                 <Button
                   variant="outline"
@@ -267,7 +304,7 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
               </>
             )}
 
-            {timer.status === 'paused' && (
+            {timer.status === "paused" && (
               <Button
                 variant="outline"
                 size="sm"
@@ -292,5 +329,3 @@ const TimerCard = ({ timer, onUpdate }: { timer: Timer; onUpdate: () => void }) 
     </Card>
   );
 };
-
-

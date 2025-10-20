@@ -23,5 +23,3 @@ export const DealDashboard = () => {
     </div>
   );
 };
-
-

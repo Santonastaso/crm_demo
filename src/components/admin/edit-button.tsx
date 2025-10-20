@@ -1,5 +1,5 @@
 import React from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Pencil } from "lucide-react";
 import {
   useCreatePath,

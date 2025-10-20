@@ -13,7 +13,7 @@ export const ActivityLogPage = () => {
           Activity Log
         </h1>
       </div>
-      
+
       <Card>
         <CardContent className="p-6">
           <ActivityLog pageSize={50} />

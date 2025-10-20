@@ -11,7 +11,9 @@ import { workflowStore } from "./workflowStore";
 
 export const WorkflowPage = () => {
   const { identity } = useGetIdentity();
-  const [workflows, setWorkflows] = useState<Workflow[]>(workflowStore.getWorkflows());
+  const [workflows, setWorkflows] = useState<Workflow[]>(
+    workflowStore.getWorkflows(),
+  );
 
   useEffect(() => {
     const unsubscribe = workflowStore.subscribe(setWorkflows);
@@ -19,7 +21,7 @@ export const WorkflowPage = () => {
   }, []);
 
   const toggleWorkflow = (id: string) => {
-    const workflow = workflows.find(w => w.id === id);
+    const workflow = workflows.find((w) => w.id === id);
     if (workflow) {
       workflowStore.updateWorkflow(id, { enabled: !workflow.enabled });
     }
@@ -29,12 +31,14 @@ export const WorkflowPage = () => {
     workflowStore.deleteWorkflow(id);
   };
 
-  const createWorkflow = (workflowData: Omit<Workflow, "id" | "created_at" | "sales_id">) => {
+  const createWorkflow = (
+    workflowData: Omit<Workflow, "id" | "created_at" | "sales_id">,
+  ) => {
     const newWorkflow: Workflow = {
       ...workflowData,
       id: Date.now().toString(), // Simple ID generation for MVP
       created_at: new Date().toISOString(),
-      sales_id: identity?.id || 1
+      sales_id: identity?.id || 1,
     };
     workflowStore.addWorkflow(newWorkflow);
   };
@@ -85,10 +89,12 @@ export const WorkflowPage = () => {
               </p>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium">When:</span> Deal stage changes to "{workflow.trigger.stage}"
+                  <span className="font-medium">When:</span> Deal stage changes
+                  to "{workflow.trigger.stage}"
                 </div>
                 <div>
-                  <span className="font-medium">Then:</span> Create "{workflow.action.taskType}" task
+                  <span className="font-medium">Then:</span> Create "
+                  {workflow.action.taskType}" task
                 </div>
               </div>
             </CardContent>

@@ -18,8 +18,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar-hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { House, List, Shell } from "lucide-react";
 

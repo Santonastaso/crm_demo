@@ -14,18 +14,18 @@ class WorkflowStore {
       description: "Automatically create a thank you task when a deal is won",
       trigger: {
         type: "deal_stage_changed",
-        stage: "won"
+        stage: "won",
       },
       action: {
         type: "create_task",
         taskType: "Thank you",
         taskText: "Send thank you message to customer",
-        dueDateOffset: 1
+        dueDateOffset: 1,
       },
       enabled: true,
       created_at: new Date().toISOString(),
-      sales_id: 1
-    }
+      sales_id: 1,
+    },
   ];
 
   constructor() {
@@ -42,7 +42,7 @@ class WorkflowStore {
   }
 
   updateWorkflow(id: string, updates: Partial<Workflow>) {
-    const index = this.workflows.findIndex(w => w.id === id);
+    const index = this.workflows.findIndex((w) => w.id === id);
     if (index !== -1) {
       this.workflows[index] = { ...this.workflows[index], ...updates };
       this.notifyListeners();
@@ -50,7 +50,7 @@ class WorkflowStore {
   }
 
   deleteWorkflow(id: string) {
-    this.workflows = this.workflows.filter(w => w.id !== id);
+    this.workflows = this.workflows.filter((w) => w.id !== id);
     this.notifyListeners();
   }
 
@@ -58,12 +58,12 @@ class WorkflowStore {
     this.listeners.push(listener);
     // Return unsubscribe function
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners() {
-    this.listeners.forEach(listener => listener([...this.workflows]));
+    this.listeners.forEach((listener) => listener([...this.workflows]));
   }
 }
 

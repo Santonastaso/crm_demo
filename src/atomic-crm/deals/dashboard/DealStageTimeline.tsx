@@ -13,7 +13,9 @@ export const DealStageTimeline = () => {
   if (!deal) return null;
 
   // Find current stage index
-  const currentStageIndex = dealStages.findIndex((stage) => stage.value === deal.stage);
+  const currentStageIndex = dealStages.findIndex(
+    (stage) => stage.value === deal.stage,
+  );
 
   return (
     <Card>
@@ -23,19 +25,22 @@ export const DealStageTimeline = () => {
       <CardContent>
         <div className="relative">
           <div className="absolute top-5 left-0 right-0 h-0.5 bg-border" />
-          
+
           <div className="relative flex justify-between">
             {dealStages.map((stage, index) => {
               const isCompleted = index <= currentStageIndex;
               const isCurrent = index === currentStageIndex;
 
               return (
-                <div key={stage.value} className="flex flex-col items-center flex-1">
+                <div
+                  key={stage.value}
+                  className="flex flex-col items-center flex-1"
+                >
                   <div
                     className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                       isCompleted
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'bg-background border-border text-muted-foreground'
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "bg-background border-border text-muted-foreground"
                     }`}
                   >
                     {isCompleted ? (
@@ -44,11 +49,11 @@ export const DealStageTimeline = () => {
                       <Circle className="h-5 w-5" />
                     )}
                   </div>
-                  
+
                   <div className="mt-3 text-center">
                     <p
                       className={`text-sm font-medium ${
-                        isCurrent ? 'text-primary' : 'text-muted-foreground'
+                        isCurrent ? "text-primary" : "text-muted-foreground"
                       }`}
                     >
                       {stage.label}
@@ -74,7 +79,9 @@ export const DealStageTimeline = () => {
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground">Ultimo aggiornamento:</span>
+              <span className="text-muted-foreground">
+                Ultimo aggiornamento:
+              </span>
               <span className="ml-2 font-medium">
                 {format(new Date(deal.updated_at), "PPP")}
               </span>
@@ -85,5 +92,3 @@ export const DealStageTimeline = () => {
     </Card>
   );
 };
-
-

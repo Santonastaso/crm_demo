@@ -1,133 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reminder Notification</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-        }
-        .priority-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-        .priority-low { background-color: #dbeafe; color: #1e40af; }
-        .priority-medium { background-color: #fef3c7; color: #92400e; }
-        .priority-high { background-color: #fed7aa; color: #9a3412; }
-        .priority-urgent { background-color: #fecaca; color: #991b1b; }
-        .content {
-            margin: 20px 0;
-        }
-        .action-required {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 15px;
-        }
-        .description {
-            color: #4b5563;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f9fafb;
-            border-left: 4px solid #2563eb;
-            border-radius: 4px;
-        }
-        .entity-info {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f3f4f6;
-            border-radius: 6px;
-        }
-        .entity-info strong {
-            color: #1f2937;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #2563eb;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            margin-top: 20px;
-        }
-        .button:hover {
-            background-color: #1d4ed8;
-        }
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            font-size: 14px;
-            color: #6b7280;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2563eb;
+      }
+      .priority-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+      .priority-low {
+        background-color: #dbeafe;
+        color: #1e40af;
+      }
+      .priority-medium {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+      .priority-high {
+        background-color: #fed7aa;
+        color: #9a3412;
+      }
+      .priority-urgent {
+        background-color: #fecaca;
+        color: #991b1b;
+      }
+      .content {
+        margin: 20px 0;
+      }
+      .action-required {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 15px;
+      }
+      .description {
+        color: #4b5563;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9fafb;
+        border-left: 4px solid #2563eb;
+        border-radius: 4px;
+      }
+      .entity-info {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f3f4f6;
+        border-radius: 6px;
+      }
+      .entity-info strong {
+        color: #1f2937;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #2563eb;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-top: 20px;
+      }
+      .button:hover {
+        background-color: #1d4ed8;
+      }
+      .footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">Atomic CRM</div>
+      <div class="header">
+        <div class="logo">Atomic CRM</div>
+      </div>
+
+      <div class="content">
+        <div class="priority-badge priority-{{priority}}">
+          {{priority}} Priority
         </div>
 
-        <div class="content">
-            <div class="priority-badge priority-{{priority}}">
-                {{priority}} Priority
-            </div>
+        <h1 class="action-required">{{actionRequired}}</h1>
 
-            <h1 class="action-required">{{actionRequired}}</h1>
+        {{#if description}}
+        <div class="description">{{description}}</div>
+        {{/if}}
 
-            {{#if description}}
-            <div class="description">
-                {{description}}
-            </div>
-            {{/if}}
-
-            <div class="entity-info">
-                <strong>Related to:</strong> {{entityType}} #{{entityId}}
-            </div>
-
-            <p>Hello {{userName}},</p>
-            <p>This is a reminder notification from your CRM system. Please take the necessary action as described above.</p>
-
-            <a href="{{crmUrl}}" class="button">Open in CRM</a>
+        <div class="entity-info">
+          <strong>Related to:</strong> {{entityType}} #{{entityId}}
         </div>
 
-        <div class="footer">
-            <p>You received this email because you have an active reminder set in Atomic CRM.</p>
-            <p>© 2025 Atomic CRM. All rights reserved.</p>
-        </div>
+        <p>Hello {{userName}},</p>
+        <p>
+          This is a reminder notification from your CRM system. Please take the
+          necessary action as described above.
+        </p>
+
+        <a href="{{crmUrl}}" class="button">Open in CRM</a>
+      </div>
+
+      <div class="footer">
+        <p>
+          You received this email because you have an active reminder set in
+          Atomic CRM.
+        </p>
+        <p>© 2025 Atomic CRM. All rights reserved.</p>
+      </div>
     </div>
-</body>
+  </body>
 </html>
-
-

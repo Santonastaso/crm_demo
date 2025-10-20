@@ -41,16 +41,16 @@ Deno.serve(async (_req) => {
     }
 
     if (!timers || timers.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No timers to process" }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ message: "No timers to process" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.log(`Processing ${timers.length} timers`);
 
     const results = await Promise.allSettled(
-      timers.map((timer) => processTimer(supabase, timer))
+      timers.map((timer) => processTimer(supabase, timer)),
     );
 
     const successful = results.filter((r) => r.status === "fulfilled").length;
@@ -63,14 +63,14 @@ Deno.serve(async (_req) => {
         successful,
         failed,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("Error processing timers:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });
 
@@ -78,10 +78,7 @@ async function processTimer(supabase: any, timer: Timer) {
   console.log(`Processing timer ${timer.id}`);
 
   // Create in-app notifications
-  const usersToNotify = [
-    timer.assigned_to,
-    ...(timer.notify_also || []),
-  ];
+  const usersToNotify = [timer.assigned_to, ...(timer.notify_also || [])];
 
   const notifications = usersToNotify.map((userId) => ({
     timer_id: timer.id,
@@ -99,7 +96,10 @@ async function processTimer(supabase: any, timer: Timer) {
     .insert(notifications);
 
   if (notifError) {
-    console.error(`Error creating notifications for timer ${timer.id}:`, notifError);
+    console.error(
+      `Error creating notifications for timer ${timer.id}:`,
+      notifError,
+    );
     throw notifError;
   }
 
@@ -119,7 +119,7 @@ async function processTimer(supabase: any, timer: Timer) {
 
   if (timer.recurrence_enabled) {
     nextTrigger = calculateNextTrigger(timer);
-    
+
     // Check if we should stop recurring
     if (timer.recurrence_end_condition === "after_n_times") {
       const maxTimes = parseInt(timer.recurrence_end_value || "0");
@@ -128,7 +128,10 @@ async function processTimer(supabase: any, timer: Timer) {
         nextTrigger = null;
       }
     } else if (timer.recurrence_end_condition === "until_date") {
-      if (nextTrigger && new Date(nextTrigger) > new Date(timer.recurrence_end_value!)) {
+      if (
+        nextTrigger &&
+        new Date(nextTrigger) > new Date(timer.recurrence_end_value!)
+      ) {
         newStatus = "completed";
         nextTrigger = null;
       }
@@ -169,7 +172,7 @@ function calculateNextTrigger(timer: Timer): string | null {
       next.setDate(next.getDate() + interval);
       break;
     case "weekly":
-      next.setDate(next.getDate() + (7 * interval));
+      next.setDate(next.getDate() + 7 * interval);
       break;
     case "monthly":
       next.setMonth(next.getMonth() + interval);
@@ -184,7 +187,7 @@ function calculateNextTrigger(timer: Timer): string | null {
 async function sendEmailNotifications(
   supabase: any,
   timer: Timer,
-  userIds: number[]
+  userIds: number[],
 ) {
   // Fetch user emails
   const { data: users, error: usersError } = await supabase
@@ -200,36 +203,34 @@ async function sendEmailNotifications(
   // Send email to each user via Postmark function
   for (const user of users) {
     try {
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/postmark`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${supabaseServiceKey}`,
+      const response = await fetch(`${supabaseUrl}/functions/v1/postmark`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({
+          type: "timer_notification",
+          to: user.email,
+          data: {
+            userName: `${user.first_name} ${user.last_name}`,
+            priority: timer.priority,
+            actionRequired: timer.action_required,
+            description: timer.description,
+            entityType: timer.entity_type,
+            entityId: timer.entity_id,
           },
-          body: JSON.stringify({
-            type: "timer_notification",
-            to: user.email,
-            data: {
-              userName: `${user.first_name} ${user.last_name}`,
-              priority: timer.priority,
-              actionRequired: timer.action_required,
-              description: timer.description,
-              entityType: timer.entity_type,
-              entityId: timer.entity_id,
-            },
-          }),
-        }
-      );
+        }),
+      });
 
       if (!response.ok) {
-        console.error(`Failed to send email to ${user.email}:`, await response.text());
+        console.error(
+          `Failed to send email to ${user.email}:`,
+          await response.text(),
+        );
       }
     } catch (error) {
       console.error(`Error sending email to ${user.email}:`, error);
     }
   }
 }
-
-
