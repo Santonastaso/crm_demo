@@ -12,7 +12,7 @@ import {
   useLocation,
   useMatch,
   useNavigate,
-} from "react-router-dom";
+} from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

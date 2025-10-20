@@ -5,7 +5,6 @@ import { Settings, User } from "lucide-react";
 import { CanAccess } from "ra-core";
 import { Link, matchPath, useLocation } from "react-router";
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import { NotificationCenter } from "../notifications/NotificationCenter";
 
 const Header = () => {
   const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
@@ -24,6 +23,8 @@ const Header = () => {
     currentPath = "/activity";
   } else if (matchPath("/workflows", location.pathname)) {
     currentPath = "/workflows";
+  } else if (matchPath("/reminders", location.pathname)) {
+    currentPath = "/reminders";
   } else {
     currentPath = false;
   }
@@ -81,12 +82,16 @@ const Header = () => {
                   to="/workflows"
                   isActive={currentPath === "/workflows"}
                 />
+                <NavigationTab
+                  label="Reminders"
+                  to="/reminders"
+                  isActive={currentPath === "/reminders"}
+                />
               </nav>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               <ThemeModeToggle />
               <RefreshButton />
-              <NotificationCenter />
               <UserMenu>
                 <ConfigurationMenu />
                 <CanAccess resource="sales" action="list">

@@ -31,6 +31,7 @@ export const TextInput = (props: TextInputProps) => {
     inputClassName,
     validate: _validateProp,
     format: _formatProp,
+    helperText,
     ...rest
   } = props;
   const { id, field, isRequired } = useInput(props);
@@ -57,21 +58,21 @@ export const TextInput = (props: TextInputProps) => {
       <FormControl>
         {multiline ? (
           <Textarea
-            {...rest}
             {...field}
+            // Do not forward non-DOM props like helperText
             value={value}
             className={inputClassName}
           />
         ) : (
           <Input
-            {...rest}
             {...field}
+            // Do not forward non-DOM props like helperText
             value={value}
             className={inputClassName}
           />
         )}
       </FormControl>
-      <InputHelperText helperText={props.helperText} />
+      <InputHelperText helperText={helperText} />
       <FormError />
     </FormField>
   );

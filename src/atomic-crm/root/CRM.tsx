@@ -19,8 +19,7 @@ import sales from "../sales";
 import { SettingsPage } from "../settings/SettingsPage";
 import { ActivityLogPage } from "../activity/ActivityLogPage";
 import { WorkflowPage } from "../workflows/WorkflowPage";
-import { TimersList } from "../timers/TimersList";
-import { NotificationsList } from "../notifications/NotificationsList";
+import { RemindersPage } from "../reminders/RemindersPage";
 import type { ConfigurationContextValue } from "./ConfigurationContext";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import {
@@ -152,8 +151,7 @@ export const CRM = ({
           <Route path={SettingsPage.path} element={<SettingsPage />} />
           <Route path={ActivityLogPage.path} element={<ActivityLogPage />} />
           <Route path={WorkflowPage.path} element={<WorkflowPage />} />
-          <Route path="/timers" element={<TimersList />} />
-          <Route path="/notifications" element={<NotificationsList />} />
+          <Route path={RemindersPage.path} element={<RemindersPage />} />
         </CustomRoutes>
         <Resource name="deals" {...deals} />
         <Resource name="contacts" {...contacts} />
@@ -161,8 +159,7 @@ export const CRM = ({
         <Resource name="contactNotes" />
         <Resource name="dealNotes" />
         <Resource name="dealInteractions" />
-        <Resource name="timers" />
-        <Resource name="notifications" />
+        <Resource name="reminders" />
         <Resource name="tasks" />
         <Resource name="sales" {...sales} />
         <Resource name="tags" />

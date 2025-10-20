@@ -30,9 +30,11 @@ import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
 import { ContactList } from "./ContactList";
 import { findDealLabel } from "./deal";
-import { DealInteractionsTimeline } from "./interactions/DealInteractionsTimeline";
-import { DealDashboard } from "./dashboard/DealDashboard";
-import { TimerCreateDialog } from "../timers/TimerCreateDialog";
+import {
+  InteractionsList,
+  InteractionsDashboard,
+} from "./interactions";
+import { ReminderCreate } from "../reminders";
 
 export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
   const redirect = useRedirect();
@@ -54,15 +56,10 @@ export const DealShow = ({ open, id }: { open: boolean; id?: string }) => {
 };
 
 const DealShowContent = () => {
+  const { dealStages } = useConfigurationContext();
   const record = useRecordContext<Deal>();
-  if (!record) return null;
-  return <DealShowContentInner />;
-};
-
-const DealShowContentInner = () => {
-  const record = useRecordContext<Deal>();
-  const [timerDialogOpen, setTimerDialogOpen] = useState(false);
-
+  const [reminderOpen, setReminderOpen] = useState(false);
+  
   if (!record) return null;
 
   return (
@@ -70,7 +67,7 @@ const DealShowContentInner = () => {
       <div className="space-y-2">
         {record.archived_at ? <ArchivedTitle /> : null}
         <div className="flex-1">
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex justify-between items-start mb-8">
             <div className="flex items-center gap-4">
               <ReferenceField
                 source="company_id"
@@ -90,12 +87,13 @@ const DealShowContentInner = () => {
               ) : (
                 <>
                   <Button
-                    variant="outline"
+                    onClick={() => setReminderOpen(true)}
                     size="sm"
-                    onClick={() => setTimerDialogOpen(true)}
+                    variant="outline"
+                    className="flex items-center gap-2 h-9"
                   >
-                    <Bell className="h-4 w-4 mr-2" />
-                    Imposta promemoria
+                    <Bell className="w-4 h-4" />
+                    Set Reminder
                   </Button>
                   <ArchiveButton record={record} />
                   <EditButton />
@@ -104,138 +102,120 @@ const DealShowContentInner = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="details" className="w-full">
+          <Tabs defaultValue="overview" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="details">Dettagli</TabsTrigger>
-              <TabsTrigger value="interactions">Interazioni</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="interactions">Interactions</TabsTrigger>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="details" className="mt-0">
-              <DealDetailsTab />
+            <TabsContent value="overview" className="space-y-4">
+              <div className="flex gap-8 m-4">
+                <div className="flex flex-col mr-10">
+                  <span className="text-xs text-muted-foreground tracking-wide">
+                    Expected closing date
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">
+                      {isValid(new Date(record.expected_closing_date))
+                        ? format(new Date(record.expected_closing_date), "PP")
+                        : "Invalid date"}
+                    </span>
+                    {new Date(record.expected_closing_date) < new Date() ? (
+                      <Badge variant="destructive">Past</Badge>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="flex flex-col mr-10">
+                  <span className="text-xs text-muted-foreground tracking-wide">
+                    Budget
+                  </span>
+                  <span className="text-sm">
+                    {record.amount.toLocaleString("en-US", {
+                      notation: "compact",
+                      style: "currency",
+                      currency: "USD",
+                      currencyDisplay: "narrowSymbol",
+                      minimumSignificantDigits: 3,
+                    })}
+                  </span>
+                </div>
+
+                {record.category && (
+                  <div className="flex flex-col mr-10">
+                    <span className="text-xs text-muted-foreground tracking-wide">
+                      Category
+                    </span>
+                    <span className="text-sm">{record.category}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-col mr-10">
+                  <span className="text-xs text-muted-foreground tracking-wide">
+                    Stage
+                  </span>
+                  <span className="text-sm">
+                    {findDealLabel(dealStages, record.stage)}
+                  </span>
+                </div>
+              </div>
+
+              {!!record.contact_ids?.length && (
+                <div className="m-4">
+                  <div className="flex flex-col min-h-12 mr-10">
+                    <span className="text-xs text-muted-foreground tracking-wide">
+                      Contacts
+                    </span>
+                    <ReferenceArrayField
+                      source="contact_ids"
+                      reference="contacts_summary"
+                    >
+                      <ContactList />
+                    </ReferenceArrayField>
+                  </div>
+                </div>
+              )}
+
+              {record.description && (
+                <div className="m-4 whitespace-pre-line">
+                  <span className="text-xs text-muted-foreground tracking-wide">
+                    Description
+                  </span>
+                  <p className="text-sm leading-6">{record.description}</p>
+                </div>
+              )}
+
+              <div className="m-4">
+                <Separator className="mb-4" />
+                <ReferenceManyField
+                  target="deal_id"
+                  reference="dealNotes"
+                  sort={{ field: "date", order: "DESC" }}
+                  empty={<NoteCreate reference={"deals"} />}
+                >
+                  <NotesIterator reference="deals" />
+                </ReferenceManyField>
+              </div>
             </TabsContent>
 
-            <TabsContent value="interactions" className="mt-0">
-              <ReferenceManyField
-                target="deal_id"
-                reference="dealInteractions"
-                sort={{ field: "date", order: "DESC" }}
-              >
-                <DealInteractionsTimeline />
-              </ReferenceManyField>
+            <TabsContent value="interactions" className="m-4">
+              <InteractionsList />
             </TabsContent>
 
-            <TabsContent value="dashboard" className="mt-0">
-              <DealDashboard />
+            <TabsContent value="dashboard" className="m-4">
+              <InteractionsDashboard />
             </TabsContent>
           </Tabs>
         </div>
       </div>
-
-      <TimerCreateDialog
-        open={timerDialogOpen}
-        onClose={() => setTimerDialogOpen(false)}
-        entityType="opportunity"
-        entityId={record.id.toString()}
+      
+      <ReminderCreate
+        open={reminderOpen}
+        onClose={() => setReminderOpen(false)}
+        entityType="deal"
+        entityId={record.id}
       />
-    </>
-  );
-};
-
-const DealDetailsTab = () => {
-  const { dealStages } = useConfigurationContext();
-  const record = useRecordContext<Deal>();
-  if (!record) return null;
-
-  return (
-    <>
-      <div className="flex gap-8 m-4">
-        <div className="flex flex-col mr-10">
-          <span className="text-xs text-muted-foreground tracking-wide">
-            Expected closing date
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="text-sm">
-              {isValid(new Date(record.expected_closing_date))
-                ? format(new Date(record.expected_closing_date), "PP")
-                : "Invalid date"}
-            </span>
-            {new Date(record.expected_closing_date) < new Date() ? (
-              <Badge variant="destructive">Past</Badge>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="flex flex-col mr-10">
-          <span className="text-xs text-muted-foreground tracking-wide">
-            Budget
-          </span>
-          <span className="text-sm">
-            {record.amount.toLocaleString("en-US", {
-              notation: "compact",
-              style: "currency",
-              currency: "USD",
-              currencyDisplay: "narrowSymbol",
-              minimumSignificantDigits: 3,
-            })}
-          </span>
-        </div>
-
-        {record.category && (
-          <div className="flex flex-col mr-10">
-            <span className="text-xs text-muted-foreground tracking-wide">
-              Category
-            </span>
-            <span className="text-sm">{record.category}</span>
-          </div>
-        )}
-
-        <div className="flex flex-col mr-10">
-          <span className="text-xs text-muted-foreground tracking-wide">
-            Stage
-          </span>
-          <span className="text-sm">
-            {findDealLabel(dealStages, record.stage)}
-          </span>
-        </div>
-      </div>
-
-      {!!record.contact_ids?.length && (
-        <div className="m-4">
-          <div className="flex flex-col min-h-12 mr-10">
-            <span className="text-xs text-muted-foreground tracking-wide">
-              Contacts
-            </span>
-            <ReferenceArrayField
-              source="contact_ids"
-              reference="contacts_summary"
-            >
-              <ContactList />
-            </ReferenceArrayField>
-          </div>
-        </div>
-      )}
-
-      {record.description && (
-        <div className="m-4 whitespace-pre-line">
-          <span className="text-xs text-muted-foreground tracking-wide">
-            Description
-          </span>
-          <p className="text-sm leading-6">{record.description}</p>
-        </div>
-      )}
-
-      <div className="m-4">
-        <Separator className="mb-4" />
-        <ReferenceManyField
-          target="deal_id"
-          reference="dealNotes"
-          sort={{ field: "date", order: "DESC" }}
-          empty={<NoteCreate reference={"deals"} />}
-        >
-          <NotesIterator reference="deals" />
-        </ReferenceManyField>
-      </div>
     </>
   );
 };

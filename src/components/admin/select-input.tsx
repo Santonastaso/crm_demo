@@ -216,7 +216,7 @@ export const SelectInput = (props: SelectInputProps) => {
         id={id}
         name={field.name}
         className={cn("w-full min-w-20", className)}
-        {...rest}
+        // Do not forward arbitrary props to DOM elements
       >
         {label !== "" && label !== false && (
           <FormLabel>
@@ -238,9 +238,7 @@ export const SelectInput = (props: SelectInputProps) => {
             value={field.value?.toString() || emptyValue}
             onValueChange={handleChangeWithCreateSupport}
           >
-            <SelectTrigger
-              className={cn("w-full transition-all hover:bg-accent")}
-            >
+            <SelectTrigger className={cn("w-full transition-all hover:bg-accent")}>
               <SelectValue placeholder={renderEmptyItemOption()} />
 
               {field.value && field.value !== emptyValue ? (

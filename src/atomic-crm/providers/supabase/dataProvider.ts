@@ -250,6 +250,17 @@ export const dataProvider = withLifecycleCallbacks(
       },
     },
     {
+      resource: "dealInteractions",
+      beforeSave: async (data: any, _, __) => {
+        if (data.attachments) {
+          for (const fi of data.attachments) {
+            await uploadToBucket(fi);
+          }
+        }
+        return data;
+      },
+    },
+    {
       resource: "sales",
       beforeSave: async (data: Sale, _, __) => {
         if (data.avatar) {
@@ -319,22 +330,8 @@ export const dataProvider = withLifecycleCallbacks(
       afterUpdate: async (data: Deal, params) => {
         // Execute workflows when deal is updated
         const workflows = workflowStore.getWorkflows();
-        const workflowEngine = new WorkflowEngine(
-          dataProviderWithCustomMethods,
-          workflows,
-        );
+        const workflowEngine = new WorkflowEngine(dataProviderWithCustomMethods, workflows);
         await workflowEngine.executeWorkflows(data, params.previousData);
-        return data;
-      },
-    },
-    {
-      resource: "dealInteractions",
-      beforeSave: async (data: any, _, __) => {
-        if (data.attachments) {
-          for (const fi of data.attachments) {
-            await uploadToBucket(fi);
-          }
-        }
         return data;
       },
     },

@@ -1,2 +1,4 @@
-export { DealInteractionCreate } from "./DealInteractionCreate";
-export { DealInteractionsTimeline } from "./DealInteractionsTimeline";
+export { InteractionCreate } from "./InteractionCreate";
+export { InteractionsList } from "./InteractionsList";
+export { InteractionsDashboard } from "./InteractionsDashboard";
+

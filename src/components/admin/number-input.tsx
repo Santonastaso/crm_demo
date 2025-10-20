@@ -19,6 +19,7 @@ export const NumberInput = (props: NumberInputProps) => {
     resource: resourceProp,
     validate: _validateProp,
     format: _formatProp,
+    helperText,
     parse = convertStringToNumber,
     onFocus,
     ...rest
@@ -72,7 +73,6 @@ export const NumberInput = (props: NumberInputProps) => {
       )}
       <FormControl>
         <Input
-          {...rest}
           {...field}
           type="number"
           value={value}
@@ -81,7 +81,7 @@ export const NumberInput = (props: NumberInputProps) => {
           onBlur={handleBlur}
         />
       </FormControl>
-      <InputHelperText helperText={props.helperText} />
+      <InputHelperText helperText={helperText} />
       <FormError />
     </FormField>
   );
