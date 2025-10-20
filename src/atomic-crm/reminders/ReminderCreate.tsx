@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -53,6 +54,10 @@ export const ReminderCreate = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Set Reminder</DialogTitle>
+          {/* Provide description for accessibility to satisfy aria-describedby */}
+          <DialogDescription>
+            Choose when to be notified and what action to take.
+          </DialogDescription>
         </DialogHeader>
         <CreateBase resource="reminders" redirect={false}>
           <Form>
@@ -228,16 +233,19 @@ const ReminderForm = ({
         <SaveButton
           type="button"
           label="Create Reminder"
-          transform={(data) => ({
-            ...data,
-            entity_type: entityType,
-            entity_id: entityId,
-            sales_id: identity.id,
-            trigger_type: triggerType,
-            trigger_date: calculateTriggerDate(),
-            status: "pending",
-            priority: data.priority || "medium",
-          })}
+          transform={(data) => {
+            const { trigger_date_input, ...allowedData } = data as any;
+            return {
+              ...allowedData,
+              entity_type: entityType,
+              entity_id: entityId,
+              sales_id: identity.id,
+              trigger_type: triggerType,
+              trigger_date: calculateTriggerDate(),
+              status: "pending",
+              priority: allowedData.priority || "medium",
+            };
+          }}
           mutationOptions={{
             onSuccess: () => {
               notify("Reminder created");
