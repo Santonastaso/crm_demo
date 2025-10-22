@@ -40,7 +40,7 @@ export default defineConfig({
           ),
         }
       : undefined,
-  base: "/crm/",
+  base: "/crm_demo/",
   esbuild: {
     keepNames: true,
   },
