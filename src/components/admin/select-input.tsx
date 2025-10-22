@@ -63,7 +63,7 @@ export const SelectInput = (props: SelectInputProps) => {
     createLabel,
     onCreate,
 
-    ...rest
+    ..._rest
   } = props;
   const translate = useTranslate();
 

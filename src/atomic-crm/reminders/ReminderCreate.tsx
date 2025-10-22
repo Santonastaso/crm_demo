@@ -234,7 +234,7 @@ const ReminderForm = ({
           type="button"
           label="Create Reminder"
           transform={(data) => {
-            const { trigger_date_input, ...allowedData } = data as any;
+            const { trigger_date_input: _trigger_date_input, ...allowedData } = data as any;
             return {
               ...allowedData,
               entity_type: entityType,

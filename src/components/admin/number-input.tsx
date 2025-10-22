@@ -22,7 +22,7 @@ export const NumberInput = (props: NumberInputProps) => {
     helperText,
     parse = convertStringToNumber,
     onFocus,
-    ...rest
+    ..._rest
   } = props;
   const resource = useResourceContext({ resource: resourceProp });
 
