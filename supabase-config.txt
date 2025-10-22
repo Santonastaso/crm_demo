@@ -1,0 +1,15 @@
+# Supabase Configuration
+# Copy these environment variables to your .env.local file or set them in your environment
+
+VITE_SUPABASE_URL=https://ogbfripessbraswwvxtj.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nYmZyaXBlc3NicmFzd3d2eHRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNDczOTAsImV4cCI6MjA3NjcyMzM5MH0.ouj1r_twMTKkjQk122QiOA0kgf5gXGg-oB2yPHms4jU
+
+# Instructions:
+# 1. Create a file named .env.local in the root directory of your project
+# 2. Copy the VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY lines above into that file
+# 3. Save the file
+# 4. Restart your development server if it's running
+
+# Alternative: You can also set these as environment variables in your system
+# export VITE_SUPABASE_URL=https://ogbfripessbraswwvxtj.supabase.co
+# export VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nYmZyaXBlc3NicmFzd3d2eHRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNDczOTAsImV4cCI6MjA3NjcyMzM5MH0.ouj1r_twMTKkjQk122QiOA0kgf5gXGg-oB2yPHms4jU

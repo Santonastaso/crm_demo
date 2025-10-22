@@ -14,12 +14,12 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: "Atomic CRM",
+      title: "Pinger Demo",
       favicon: "./public/favicon.svg",
       customCss: ["./src/styles/global.css"],
       logo: {
-        dark: "./public/logo_atomic_crm_dark.svg",
-        light: "./public/logo_atomic_crm_light.svg",
+        dark: "",
+        light: "",
       },
       head: [
         {
