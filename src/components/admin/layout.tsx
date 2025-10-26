@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { CoreLayoutProps } from "ra-core";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserMenu } from "@/components/admin/user-menu";
-import { ThemeSwitch } from "@andrea/repo-ui";
+import { ThemeSwitch } from "@andrea/crm-ui";
 import { Notification } from "@/components/admin/notification";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { RefreshButton } from "@/components/admin/refresh-button";

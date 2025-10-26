@@ -1,5 +1,5 @@
 import { RefreshButton, UserMenu } from "@/components/admin";
-import { ThemeSwitch } from "@andrea/repo-ui";
+import { ThemeSwitch } from "@andrea/crm-ui";
 import { useUserMenu } from "@/hooks/user-menu-context";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Settings, User } from "lucide-react";
