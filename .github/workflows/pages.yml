@@ -30,7 +30,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund --legacy-peer-deps
+        run: npm install --prefer-offline --no-audit --no-fund --legacy-peer-deps
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
