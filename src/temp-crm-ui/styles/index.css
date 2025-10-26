@@ -1,4 +1,5 @@
-/* src/styles/index.css */
+/* CRM UI Professional Styling System */
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -33,6 +34,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -66,29 +68,34 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* Professional interaction states */
 a,
 button {
   cursor: pointer;
 }
+
 input {
   cursor: text;
 }
-a[aria-disabled=true],
-button[aria-disabled=true],
+
+a[aria-disabled="true"],
+button[aria-disabled="true"],
 button:disabled,
-input[aria-disabled=true],
+input[aria-disabled="true"],
 input:disabled {
   cursor: not-allowed;
 }
-input[type=date],
-input[type=datetime-local],
-input[type=month],
-input[type=time] {
+
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"] {
   position: relative;
 }
+
 .dark ::-webkit-calendar-picker-indicator {
   filter: invert(1);
   position: absolute;
   right: 0.75rem;
 }
-/*# sourceMappingURL=styles.css.map */
