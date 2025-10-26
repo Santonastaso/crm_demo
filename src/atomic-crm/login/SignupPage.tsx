@@ -1,4 +1,4 @@
-import { Button, Input, Label } from "@santonastaso/crm-ui";
+import { Button, Input, Label } from "@santonastaso/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useDataProvider, useLogin, useNotify } from "ra-core";

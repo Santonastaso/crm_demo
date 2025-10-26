@@ -1,5 +1,5 @@
 import { RecordField, TextInput } from "@/components/admin";
-import { Button } from "@santonastaso/crm-ui";
+import { Button } from "@santonastaso/shared";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Tooltip,

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useCallback, useEffect } from "react";
 import { Toaster, type ToasterProps, toast } from "sonner";
-import { useTheme } from "@santonastaso/crm-ui";
+import { useTheme } from "@santonastaso/shared";
 import {
   CloseNotificationContext,
   useNotificationContext,
