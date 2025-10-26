@@ -10,7 +10,7 @@ import { i18nProvider as defaultI18nProvider } from "@/lib/i18nProvider";
 import { Layout } from "@/components/admin/layout";
 import { LoginPage } from "@/components/admin/login-page";
 import { Ready } from "@/components/admin/ready";
-import { ThemeProvider } from "@andrea/crm-ui";
+import { ThemeProvider } from "@santonastaso/crm-ui";
 import { AuthCallback } from "@/components/admin/authentication";
 
 const defaultStore = localStorageStore();
