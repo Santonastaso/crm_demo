@@ -1,5 +1,5 @@
 import { RecordField, TextInput } from "@/components/admin";
-import { Button } from "@/components/ui/button";
+import { Button } from "@andrea/repo-ui";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Tooltip,

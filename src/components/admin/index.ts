@@ -64,7 +64,5 @@ export * from "./sort-button";
 export * from "./text-field";
 export * from "./text-input";
 export * from "./toggle-filter-button";
-export * from "./theme-mode-toggle";
-export * from "./theme-provider";
 export * from "./url-field";
 export * from "./user-menu";

@@ -40,7 +40,11 @@ export default defineConfig({
           ),
         }
       : undefined,
-  base: "/crm_demo/",
+  base: process.env.NODE_ENV === "production" ? "/crm_demo/" : "/",
+  server: {
+    port: 5173,
+    host: true,
+  },
   esbuild: {
     keepNames: true,
   },

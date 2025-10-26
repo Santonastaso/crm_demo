@@ -1,5 +1,5 @@
 import { CreateButton } from "@/components/admin";
-import { Button } from "@/components/ui/button";
+import { Button } from "@andrea/repo-ui";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Circle } from "lucide-react";

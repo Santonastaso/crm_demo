@@ -1,4 +1,5 @@
-import { RefreshButton, ThemeModeToggle, UserMenu } from "@/components/admin";
+import { RefreshButton, UserMenu } from "@/components/admin";
+import { ThemeSwitch } from "@andrea/repo-ui";
 import { useUserMenu } from "@/hooks/user-menu-context";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Settings, User } from "lucide-react";
@@ -90,7 +91,7 @@ const Header = () => {
               </nav>
             </div>
             <div className="flex items-center">
-              <ThemeModeToggle />
+              <ThemeSwitch />
               <RefreshButton />
               <UserMenu>
                 <ConfigurationMenu />

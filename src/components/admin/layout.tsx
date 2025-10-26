@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { CoreLayoutProps } from "ra-core";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserMenu } from "@/components/admin/user-menu";
-import { ThemeModeToggle } from "@/components/admin/theme-mode-toggle";
+import { ThemeSwitch } from "@andrea/repo-ui";
 import { Notification } from "@/components/admin/notification";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { RefreshButton } from "@/components/admin/refresh-button";
@@ -27,7 +27,7 @@ export const Layout = (props: CoreLayoutProps) => {
           <SidebarTrigger className="scale-125 sm:scale-100" />
           <div className="flex-1 flex items-center" id="breadcrumb" />
           <LocalesMenuButton />
-          <ThemeModeToggle />
+          <ThemeSwitch />
           <RefreshButton />
           <UserMenu />
         </header>
