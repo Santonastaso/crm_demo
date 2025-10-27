@@ -1,153 +1,58 @@
-import { RefreshButton, UserMenu } from "@/components/admin";
-import { ThemeSwitch } from "@santonastaso/shared";
-import { useUserMenu } from "@/hooks/user-menu-context";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Settings, User } from "lucide-react";
-import { CanAccess } from "ra-core";
-import { Link, matchPath, useLocation } from "react-router";
-import { useConfigurationContext } from "../root/ConfigurationContext";
+import React from 'react';
+import { Settings, User } from 'lucide-react';
+import { AppHeader } from '@santonastaso/shared';
+import { useConfigurationContext } from '../root/ConfigurationContext';
+import { useAuthProvider, useGetIdentity, useLogout } from 'ra-core';
+import { Link } from 'react-router';
 
 const Header = () => {
   const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
-  const location = useLocation();
+  const authProvider = useAuthProvider();
+  const { data: identity } = useGetIdentity();
+  const logout = useLogout();
 
-  let currentPath: string | boolean = "/";
-  if (matchPath("/", location.pathname)) {
-    currentPath = "/";
-  } else if (matchPath("/contacts/*", location.pathname)) {
-    currentPath = "/contacts";
-  } else if (matchPath("/companies/*", location.pathname)) {
-    currentPath = "/companies";
-  } else if (matchPath("/deals/*", location.pathname)) {
-    currentPath = "/deals";
-  } else if (matchPath("/activity", location.pathname)) {
-    currentPath = "/activity";
-  } else if (matchPath("/workflows", location.pathname)) {
-    currentPath = "/workflows";
-  } else if (matchPath("/reminders", location.pathname)) {
-    currentPath = "/reminders";
-  } else {
-    currentPath = false;
-  }
+  // Navigation items for CRM
+  const navigationItems = [
+    { label: 'Dashboard', to: '/', isActive: true },
+    { label: 'Contacts', to: '/contacts' },
+    { label: 'Companies', to: '/companies' },
+    { label: 'Deals', to: '/deals' },
+    { label: 'Activity', to: '/activity' },
+    { label: 'Workflows', to: '/workflows' },
+    { label: 'Reminders', to: '/reminders' },
+  ];
 
   return (
-    <nav className="flex-grow">
-      <header className="bg-secondary">
-        <div className="px-4">
-          <div className="flex justify-between items-center flex-1">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-secondary-foreground no-underline"
-            >
-              <img
-                className="[.light_&]:hidden h-6"
-                src={darkModeLogo}
-                alt={title}
-              />
-              <img
-                className="[.dark_&]:hidden h-6"
-                src={lightModeLogo}
-                alt={title}
-              />
-              <h1 className="text-xl font-semibold">{title}</h1>
-            </Link>
-            <div>
-              <nav className="flex">
-                <NavigationTab
-                  label="Dashboard"
-                  to="/"
-                  isActive={currentPath === "/"}
-                />
-                <NavigationTab
-                  label="Contacts"
-                  to="/contacts"
-                  isActive={currentPath === "/contacts"}
-                />
-                <NavigationTab
-                  label="Companies"
-                  to="/companies"
-                  isActive={currentPath === "/companies"}
-                />
-                <NavigationTab
-                  label="Deals"
-                  to="/deals"
-                  isActive={currentPath === "/deals"}
-                />
-                <NavigationTab
-                  label="Activity"
-                  to="/activity"
-                  isActive={currentPath === "/activity"}
-                />
-                <NavigationTab
-                  label="Workflows"
-                  to="/workflows"
-                  isActive={currentPath === "/workflows"}
-                />
-                <NavigationTab
-                  label="Reminders"
-                  to="/reminders"
-                  isActive={currentPath === "/reminders"}
-                />
-              </nav>
-            </div>
-            <div className="flex items-center">
-              <ThemeSwitch />
-              <RefreshButton />
-              <UserMenu>
-                <ConfigurationMenu />
-                <CanAccess resource="sales" action="list">
-                  <UsersMenu />
-                </CanAccess>
-              </UserMenu>
-            </div>
-          </div>
-        </div>
-      </header>
-    </nav>
+    <AppHeader
+      title={title}
+      logo={{
+        light: lightModeLogo,
+        dark: darkModeLogo
+      }}
+      navigationItems={navigationItems}
+      user={{
+        name: identity?.fullName || identity?.email?.split('@')[0] || 'User',
+        email: identity?.email,
+        avatar: identity?.avatar
+      }}
+      onLogout={() => logout()}
+      onRefresh={() => window.location.reload()}
+      onSettings={() => window.location.href = '/settings'}
+      onUsers={() => window.location.href = '/sales'}
+      customMenuItems={
+        <>
+          <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm">
+            <Settings className="h-4 w-4" />
+            My info
+          </Link>
+          <Link to="/sales" className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm">
+            <User className="h-4 w-4" />
+            Users
+          </Link>
+        </>
+      }
+    />
   );
 };
 
-const NavigationTab = ({
-  label,
-  to,
-  isActive,
-}: {
-  label: string;
-  to: string;
-  isActive: boolean;
-}) => (
-  <Link
-    to={to}
-    className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-      isActive
-        ? "text-secondary-foreground border-secondary-foreground"
-        : "text-secondary-foreground/70 border-transparent hover:text-secondary-foreground/80"
-    }`}
-  >
-    {label}
-  </Link>
-);
-
-const UsersMenu = () => {
-  const { onClose } = useUserMenu() ?? {};
-  return (
-    <DropdownMenuItem asChild onClick={onClose}>
-      <Link to="/sales" className="flex items-center gap-2">
-        <User /> Users
-      </Link>
-    </DropdownMenuItem>
-  );
-};
-
-const ConfigurationMenu = () => {
-  const { onClose } = useUserMenu() ?? {};
-  return (
-    <DropdownMenuItem asChild onClick={onClose}>
-      <Link to="/settings" className="flex items-center gap-2">
-        <Settings />
-        My info
-      </Link>
-    </DropdownMenuItem>
-  );
-};
 export default Header;
