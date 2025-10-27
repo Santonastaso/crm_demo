@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
-    "@santonastaso/shared": "0.1.13",
+    "@santonastaso/shared": "0.1.14",
     "@tanstack/react-table": "^8.21.3",
     "zustand": "^5.0.8",
     "@hookform/resolvers": "^5.1.1",
