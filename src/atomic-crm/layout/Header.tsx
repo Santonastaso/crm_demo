@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExactHeader } from '@santonastaso/shared';
+import { ExactHeader } from '../../components/admin/exact-header';
 import { useConfigurationContext } from '../root/ConfigurationContext';
 import { useAuthProvider, useGetIdentity, useLogout } from 'ra-core';
 
