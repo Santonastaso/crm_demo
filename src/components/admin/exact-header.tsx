@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { ThemeSwitch } from '../../temp-crm-ui/components/theme/ThemeSwitch';
+import { ThemeSwitch } from '@santonastaso/shared';
 
 // UserMenu Context
 export type UserMenuContextValue = {
