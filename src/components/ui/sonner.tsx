@@ -1,4 +1,4 @@
-import { useTheme } from "@/temp-crm-ui/components/theme/ThemeProvider";
+import { useTheme } from "@santonastaso/shared";
 import type { ToasterProps } from "sonner";
 import { Toaster as Sonner } from "sonner";
 
