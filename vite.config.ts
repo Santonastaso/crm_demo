@@ -53,9 +53,14 @@ export default defineConfig({
   },
   resolve: {
     preserveSymlinks: true,
+    // Ensure single React instance to prevent hook conflicts
+    dedupe: ['react', 'react-dom'],
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "react-router-dom": "react-router",
+      // Force all React imports to use the same instance
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
 });

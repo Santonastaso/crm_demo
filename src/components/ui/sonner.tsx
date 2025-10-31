@@ -1,4 +1,4 @@
-import { useTheme } from "next-themes";
+import { useTheme } from "@/temp-crm-ui/components/theme/ThemeProvider";
 import type { ToasterProps } from "sonner";
 import { Toaster as Sonner } from "sonner";
 
