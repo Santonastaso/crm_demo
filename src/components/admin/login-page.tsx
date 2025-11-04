@@ -44,62 +44,51 @@ export const LoginPage = (props: { redirectTo?: string }) => {
   };
 
   return (
-    <div className="min-h-screen w-full flex">
-      {/* Left Panel - Brand/Logo Section */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col p-10 text-white" style={{ backgroundColor: '#18181b' }}>
-        <div className="relative z-20 flex items-center text-lg font-medium">
-          {darkModeLogo && <img className="h-6 mr-2" src={darkModeLogo} alt={title} />}
-          {title}
-        </div>
-      </div>
-
-      {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-sm space-y-6">
-          {/* Mobile Logo/Title */}
-           <div className="flex flex-col space-y-2 text-center lg:hidden">
-             {darkModeLogo && <img className="h-8 mx-auto" src={darkModeLogo} alt={title} />}
-             <h1 className="text-xl font-semibold">{title}</h1>
-           </div>
-
-          {/* Sign in header */}
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+    <div className="min-h-screen flex">
+      <div className="container relative grid flex-col items-center justify-center sm:max-w-none lg:grid-cols-2 lg:px-0">
+        <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
+          <div className="absolute inset-0 bg-zinc-900" />
+          <div className="relative z-20 flex items-center text-lg font-medium">
+            <img className="h-6 mr-2" src={darkModeLogo} alt={title} />
+            {title}
           </div>
+        </div>
+        <div className="lg:p-8">
+          <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+            <div className="flex flex-col space-y-2 text-center">
+              <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+            </div>
+            <Form className="space-y-8" onSubmit={handleSubmit}>
+              <TextInput
+                label="Email"
+                source="email"
+                type="email"
+                validate={required()}
+              />
+              <TextInput
+                label="Password"
+                source="password"
+                type="password"
+                validate={required()}
+              />
+              <Button
+                type="submit"
+                className="cursor-pointer"
+                disabled={loading}
+              >
+                Sign in
+              </Button>
+            </Form>
 
-          {/* Login Form */}
-          <Form className="space-y-8" onSubmit={handleSubmit}>
-            <TextInput
-              label="Email"
-              source="email"
-              type="email"
-              validate={required()}
-            />
-            <TextInput
-              label="Password"
-              source="password"
-              type="password"
-              validate={required()}
-            />
-            <Button
-              type="submit"
-              className="w-full cursor-pointer"
-              disabled={loading}
+            <Link
+              to={"/forgot-password"}
+              className="text-sm text-center hover:underline"
             >
-              Sign in
-            </Button>
-          </Form>
-
-          {/* Forgot Password Link */}
-          <Link
-            to={"/forgot-password"}
-            className="block text-sm text-center hover:underline"
-          >
-            Forgot your password?
-          </Link>
+              Forgot your password?
+            </Link>
+          </div>
         </div>
       </div>
-      
       <Notification />
     </div>
   );

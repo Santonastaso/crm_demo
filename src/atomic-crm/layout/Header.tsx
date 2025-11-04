@@ -1,5 +1,6 @@
 import React from 'react';
-import { ExactHeader } from '../../components/admin/exact-header';
+import { Link } from 'react-router';
+import { UnifiedHeader } from '@santonastaso/shared';
 import { useConfigurationContext } from '../root/ConfigurationContext';
 import { useAuthProvider, useGetIdentity, useLogout } from 'ra-core';
 
@@ -21,7 +22,7 @@ const Header = () => {
   ];
 
   return (
-    <ExactHeader
+    <UnifiedHeader
       title={title}
       darkModeLogo={darkModeLogo}
       lightModeLogo={lightModeLogo}
@@ -33,6 +34,7 @@ const Header = () => {
       }}
       onLogout={() => logout()}
       onRefresh={() => window.location.reload()}
+      LinkComponent={Link}
     />
   );
 };

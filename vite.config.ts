@@ -61,8 +61,6 @@ export default defineConfig({
       // Force all React imports to use the same instance
       'react': path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      // Fix CSS import from shared package
-      '@santonastaso/shared/styles.css': path.resolve(__dirname, 'node_modules/@santonastaso/shared/dist/styles.css'),
     },
   },
 });
