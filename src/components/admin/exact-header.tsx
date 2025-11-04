@@ -194,7 +194,7 @@ export const ExactHeader: React.FC<ExactHeaderProps> = ({
     <nav className="flex-grow">
       <header className="bg-secondary">
         <div className="px-4">
-          <div className="flex justify-between items-center flex-1">
+          <div className="flex justify-between items-center flex-1 h-12">
             <Link
               to="/"
               className="flex items-center gap-2 text-secondary-foreground no-underline"
@@ -215,7 +215,7 @@ export const ExactHeader: React.FC<ExactHeaderProps> = ({
               )}
               <h1 className="text-xl font-semibold">{title}</h1>
             </Link>
-            <div>
+            <div className="flex-1 flex justify-center">
               <nav className="flex">
                 {navigationItems.map((item) => (
                   <NavigationTab
