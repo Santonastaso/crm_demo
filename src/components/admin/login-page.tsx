@@ -46,22 +46,21 @@ export const LoginPage = (props: { redirectTo?: string }) => {
   return (
     <div className="min-h-screen w-full flex">
       {/* Left Panel - Brand/Logo Section */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col bg-muted p-10 text-white">
-        <div className="absolute inset-0 bg-zinc-900" />
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col p-10 text-white" style={{ backgroundColor: '#18181b' }}>
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <img className="h-6 mr-2" src={darkModeLogo} alt={title} />
+          {darkModeLogo && <img className="h-6 mr-2" src={darkModeLogo} alt={title} />}
           {title}
         </div>
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-sm space-y-6">
           {/* Mobile Logo/Title */}
-          <div className="flex flex-col space-y-2 text-center lg:hidden">
-            <img className="h-8 mx-auto" src={darkModeLogo} alt={title} />
-            <h1 className="text-xl font-semibold">{title}</h1>
-          </div>
+           <div className="flex flex-col space-y-2 text-center lg:hidden">
+             {darkModeLogo && <img className="h-8 mx-auto" src={darkModeLogo} alt={title} />}
+             <h1 className="text-xl font-semibold">{title}</h1>
+           </div>
 
           {/* Sign in header */}
           <div className="flex flex-col space-y-2 text-center">
