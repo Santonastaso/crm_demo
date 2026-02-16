@@ -2,6 +2,7 @@ import { useGetList } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
+import { formatEUR } from "@/lib/formatPrice";
 
 export const PipelineValue = () => {
   const { dealStages } = useConfigurationContext();
@@ -30,7 +31,7 @@ export const PipelineValue = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="text-2xl font-bold">€{grandTotal.toLocaleString("it-IT")}</div>
+        <div className="text-2xl font-bold">{formatEUR(grandTotal)}</div>
         <div className="text-xs text-muted-foreground mb-2">{deals.length} active deals</div>
         <div className="space-y-1.5">
           {byStage
@@ -39,7 +40,7 @@ export const PipelineValue = () => {
               <div key={s.value} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{s.label}</span>
                 <span className="font-medium">
-                  {s.count} — €{s.total.toLocaleString("it-IT")}
+                  {s.count} — {formatEUR(s.total)}
                 </span>
               </div>
             ))}

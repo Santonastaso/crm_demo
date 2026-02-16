@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 
 interface SegmentCriterion {
@@ -155,14 +155,9 @@ Deno.serve(async (req: Request) => {
     .update({ last_refreshed_at: new Date().toISOString() })
     .eq("id", segment_id);
 
-  return new Response(
-    JSON.stringify({
-      segment_id,
-      contact_count: contactIds.length,
-      refreshed_at: new Date().toISOString(),
-    }),
-    {
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    },
-  );
+  return createJsonResponse({
+    segment_id,
+    contact_count: contactIds.length,
+    refreshed_at: new Date().toISOString(),
+  });
 });

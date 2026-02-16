@@ -1,4 +1,5 @@
 import { Droppable } from "@hello-pangea/dnd";
+import { formatEURCompact } from "@/lib/formatPrice";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
@@ -22,13 +23,7 @@ export const DealColumn = ({
           {findDealLabel(dealStages, stage)}
         </h3>
         <p className="text-sm text-muted-foreground">
-          {totalAmount.toLocaleString("en-US", {
-            notation: "compact",
-            style: "currency",
-            currency: "USD",
-            currencyDisplay: "narrowSymbol",
-            minimumSignificantDigits: 3,
-          })}
+          {formatEURCompact(totalAmount)}
         </p>
       </div>
       <Droppable droppableId={stage}>

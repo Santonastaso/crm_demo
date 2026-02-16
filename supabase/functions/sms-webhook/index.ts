@@ -1,10 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
+import { createErrorResponse } from "../_shared/utils.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
+import { findContactByPhone } from "../_shared/contactUtils.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return createErrorResponse(405, "Method Not Allowed");
   }
 
   // Twilio sends application/x-www-form-urlencoded
@@ -20,30 +22,8 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // Normalize phone for matching (strip spaces, keep + prefix)
-  const normalized = from.replace(/\s+/g, "");
-
-  // Try to match sender phone to an existing contact
-  let contactId: number | null = null;
-
-  const { data: contacts } = await supabaseAdmin
-    .from("contacts")
-    .select("id, phone_jsonb")
-    .limit(500);
-
-  if (contacts) {
-    for (const c of contacts) {
-      const phones = c.phone_jsonb ?? [];
-      for (const p of phones) {
-        const pNorm = (p.number ?? "").replace(/\s+/g, "");
-        if (pNorm === normalized || pNorm === normalized.replace(/^\+/, "")) {
-          contactId = c.id;
-          break;
-        }
-      }
-      if (contactId) break;
-    }
-  }
+  // Match sender phone to an existing contact
+  const contactId = await findContactByPhone(from);
 
   await logCommunication({
     contact_id: contactId,

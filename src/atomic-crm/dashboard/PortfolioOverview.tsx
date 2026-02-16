@@ -2,13 +2,8 @@ import { useGetList } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { PropertyUnit } from "../types";
-
-const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  disponibile: "default",
-  opzionato: "secondary",
-  compromesso: "outline",
-  rogitato: "destructive",
-};
+import { UNIT_STATUS_COLORS } from "../property-units/unitStatus";
+import { formatEUR } from "@/lib/formatPrice";
 
 export const PortfolioOverview = () => {
   const { data: units, isPending } = useGetList<PropertyUnit>("property_units", {
@@ -44,7 +39,7 @@ export const PortfolioOverview = () => {
         <div className="flex flex-wrap gap-2">
           {Object.entries(byStatus).map(([status, count]) => (
             <div key={status} className="flex items-center gap-1">
-              <Badge variant={STATUS_COLORS[status] ?? "outline"} className="text-xs">
+              <Badge variant={UNIT_STATUS_COLORS[status] ?? "outline"} className="text-xs">
                 {status}
               </Badge>
               <span className="text-sm font-medium">{count}</span>
@@ -54,7 +49,7 @@ export const PortfolioOverview = () => {
         <div className="pt-2 border-t space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Total Value</span>
-            <span className="font-medium">€{totalValue.toLocaleString("it-IT")}</span>
+            <span className="font-medium">{formatEUR(totalValue)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Available</span>

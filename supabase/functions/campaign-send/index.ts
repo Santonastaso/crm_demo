@@ -1,8 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
+import { primaryEmail, primaryPhone } from "../_shared/contactUtils.ts";
 
 function renderTemplate(
   template: string,
@@ -12,12 +13,10 @@ function renderTemplate(
     if (key === "first_name") return contact.first_name ?? "";
     if (key === "last_name") return contact.last_name ?? "";
     if (key === "email") {
-      const emails = contact.email_jsonb ?? [];
-      return emails[0]?.email ?? "";
+      return primaryEmail(contact) ?? "";
     }
     if (key === "phone") {
-      const phones = contact.phone_jsonb ?? [];
-      return phones[0]?.number ?? "";
+      return primaryPhone(contact) ?? "";
     }
     return contact[key] ?? "";
   });
@@ -35,7 +34,7 @@ async function sendViaChannel(
   const contactId = contact.id;
 
   if (channel === "whatsapp") {
-    const phone = (contact.phone_jsonb ?? [])[0]?.number;
+    const phone = primaryPhone(contact);
     if (!phone) return { status: "failed" };
 
     const response = await invokeEdgeFunction("whatsapp-send", {
@@ -52,7 +51,7 @@ async function sendViaChannel(
   }
 
   if (channel === "sms") {
-    const phone = (contact.phone_jsonb ?? [])[0]?.number;
+    const phone = primaryPhone(contact);
     if (!phone) return { status: "failed" };
 
     const response = await invokeEdgeFunction("sms-send", {
@@ -69,8 +68,7 @@ async function sendViaChannel(
   }
 
   if (channel === "email") {
-    const emails = contact.email_jsonb ?? [];
-    const email = emails[0]?.email;
+    const email = primaryEmail(contact);
     if (!email) return { status: "failed" };
 
     // Generate tracking_id upfront for open/click tracking
@@ -149,10 +147,11 @@ Deno.serve(async (req: Request) => {
       .update({ status: "completed", completed_at: new Date().toISOString() })
       .eq("id", campaign_id);
 
-    return new Response(
-      JSON.stringify({ campaign_id, contacts_sent: 0, status: "completed" }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({
+      campaign_id,
+      contacts_sent: 0,
+      status: "completed",
+    });
   }
 
   // Get full contact data
@@ -234,13 +233,10 @@ Deno.serve(async (req: Request) => {
     .update({ status: "completed", completed_at: new Date().toISOString() })
     .eq("id", campaign_id);
 
-  return new Response(
-    JSON.stringify({
-      campaign_id,
-      contacts_total: contacts?.length ?? 0,
-      contacts_sent: sentCount,
-      status: "completed",
-    }),
-    { headers: { "Content-Type": "application/json", ...corsHeaders } },
-  );
+  return createJsonResponse({
+    campaign_id,
+    contacts_total: contacts?.length ?? 0,
+    contacts_sent: sentCount,
+    status: "completed",
+  });
 });

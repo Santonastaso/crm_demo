@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { getValidGmailToken } from "../_shared/gmailToken.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
@@ -156,14 +156,11 @@ Deno.serve(async (req: Request) => {
       },
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message_id: gmailResult.id,
-        thread_id: gmailResult.threadId,
-      }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({
+      success: true,
+      message_id: gmailResult.id,
+      thread_id: gmailResult.threadId,
+    });
   } catch (err) {
     console.error("gmail-send error:", err);
     return createErrorResponse(500, (err as Error).message);

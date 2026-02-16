@@ -4,12 +4,7 @@ import { Send, Loader2, MessageCircle } from "lucide-react";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-interface ChatMessage {
-  id: string;
-  sender: "user" | "ai";
-  content: string;
-  timestamp: Date;
-}
+import type { ChatMessage } from "./chatTypes";
 
 async function sendChatMessage(
   message: string,

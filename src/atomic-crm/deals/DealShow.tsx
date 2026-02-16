@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
 import { Archive, ArchiveRestore, Bell } from "lucide-react";
+import { formatEURCompact } from "@/lib/formatPrice";
 import { useState } from "react";
 import {
   ShowBase,
@@ -133,13 +134,7 @@ const DealShowContent = () => {
                     Budget
                   </span>
                   <span className="text-sm">
-                    {record.amount.toLocaleString("it-IT", {
-                      notation: "compact",
-                      style: "currency",
-                      currency: "EUR",
-                      currencyDisplay: "narrowSymbol",
-                      minimumSignificantDigits: 3,
-                    })}
+                    {formatEURCompact(record.amount)}
                   </span>
                 </div>
 

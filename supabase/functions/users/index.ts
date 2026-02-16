@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 
 async function updateSaleDisabled(user_id: string, disabled: boolean) {
   return await supabaseAdmin
@@ -74,14 +74,7 @@ async function inviteUser(req: Request, currentUserSale: any) {
     await updateSaleDisabled(data.user.id, disabled);
     const sale = await updateSaleRole(data.user.id, role ?? "agent");
 
-    return new Response(
-      JSON.stringify({
-        data: sale,
-      }),
-      {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      },
-    );
+    return createJsonResponse({ data: sale });
   } catch (e) {
     console.error("Error patching sale:", e);
     return createErrorResponse(500, "Internal Server Error");
@@ -135,33 +128,13 @@ async function patchUser(req: Request, currentUserSale: any) {
       .select("*")
       .eq("id", sales_id)
       .single();
-    return new Response(
-      JSON.stringify({
-        data: new_sale,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      },
-    );
+    return createJsonResponse({ data: new_sale });
   }
 
   try {
     await updateSaleDisabled(data.user.id, disabled);
     const updatedSale = await updateSaleRole(data.user.id, role ?? sale.role ?? "agent");
-    return new Response(
-      JSON.stringify({
-        data: updatedSale,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      },
-    );
+    return createJsonResponse({ data: updatedSale });
   } catch (e) {
     console.error("Error patching sale:", e);
     return createErrorResponse(500, "Internal Server Error");

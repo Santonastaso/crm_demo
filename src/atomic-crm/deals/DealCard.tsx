@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Draggable } from "@hello-pangea/dnd";
 import { useRedirect } from "ra-core";
 import { CompanyAvatar } from "../companies/CompanyAvatar";
+import { formatEURCompact } from "@/lib/formatPrice";
 import type { Deal } from "../types";
 
 export const DealCard = ({ deal, index }: { deal: Deal; index: number }) => {
@@ -60,13 +61,7 @@ export const DealCardContent = ({
           <div className="ml-3">
             <p className="text-sm font-medium mb-2">{deal.name}</p>
             <p className="text-xs text-muted-foreground">
-              {deal.amount.toLocaleString("it-IT", {
-                notation: "compact",
-                style: "currency",
-                currency: "EUR",
-                currencyDisplay: "narrowSymbol",
-                minimumSignificantDigits: 3,
-              })}
+              {formatEURCompact(deal.amount)}
               {deal.category ? `, ${deal.category}` : ""}
             </p>
           </div>

@@ -5,6 +5,7 @@
 
 import { Card } from "@/components/ui/card";
 import { DollarSign } from "lucide-react";
+import { formatEURCompact } from "@/lib/formatPrice";
 import { useGetIdentity, useGetList } from "ra-core";
 
 import { ReferenceField } from "@/components/admin";
@@ -65,13 +66,7 @@ export const DealsPipeline = () => {
           isPending={isPending}
           primaryText={(deal) => deal.name}
           secondaryText={(deal) =>
-            `${deal.amount.toLocaleString("en-US", {
-              notation: "compact",
-              style: "currency",
-              currency: "USD",
-              currencyDisplay: "narrowSymbol",
-              minimumSignificantDigits: 3,
-            })} , ${findDealLabel(dealStages, deal.stage)}`
+            `${formatEURCompact(deal.amount)} , ${findDealLabel(dealStages, deal.stage)}`
           }
           leftAvatar={(deal) => (
             <ReferenceField

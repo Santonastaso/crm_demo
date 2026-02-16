@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 
 async function updatePassword(user: any) {
@@ -12,14 +12,7 @@ async function updatePassword(user: any) {
     return createErrorResponse(500, "Internal Server Error");
   }
 
-  return new Response(
-    JSON.stringify({
-      data,
-    }),
-    {
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    },
-  );
+  return createJsonResponse({ data });
 }
 
 Deno.serve(async (req: Request) => {

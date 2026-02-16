@@ -1,0 +1,39 @@
+Industrie Edili Holding - Arte di Abitare
+LINKS
+https://www.industrieedili.it/web/default.asp?language=ita
+https://www.artediabitare.it/
+Contesto 
+Industrie Edili Holding consiste in una società di real estate che si occupa dell'intera filiera dell’immobiliare.
+
+La società infatti acquista un’area, costruisce un immobile e ne gestisce la vendita tramite L’Arte di Abitare.
+Il processo sia di costruzione che di vendita è particolarmente variabile poiché in funzione alla struttura ne consegue la vendita. 
+Quest’ultima può essere indirizzata infatti a privati che desiderano un’abitazione o a privati/istituzioni che vogliono investire nel progetto o nella società.
+
+Attualmente le attività commerciali e tutti i processi interconnessi come il marketing rappresentano per il cliente le migliori quick wins. 
+L’output richiesto è una clusterizzazione dinamica ed una gestione specifica dei diversi contatti. 
+In particolare si richiede di gestire in maniera efficiente la comunicazione, la ricerca e la classificazione dei singoli contatti ottenendo uno scraping dettagliato che permette al reparto vendite di indirizzare l’incontro e la sessione di deal closing.
+Obiettivi
+Sviluppare una piattaforma integrata che permetta di:
+Classificare lead clienti nelle loro caratteristiche ed interazioni avute con la società 
+Gestire l’invio mail per lista clienti clusterizzati
+Effettuare scaping clienti per area geografica interessata 
+Sviluppare conversazioni automatiche tra lead tramite un know how per progetto
+Concludere il processo fissando appuntamento/call dove vi è un breve recap dell’interazione avuta con il lead secondo i passaggi sopra riportati 
+Scope of WORK 
+Il cliente si aspetta di ottenere una piattaforma per gestire le vendite di tutti i progetti immobiliari. 
+Vi sarà dunque all’interno della piattaforma una struttura madre che consiste in un CRM verticale per il settore real estate, in particolare:
+Gestione Anagrafica Immobiliare gestire catalogo di unità immobiliari con schede tecniche (metratura, tipologia, piano, orientamento, classe energetica), pricing (listini, sconti, promozioni per fase di vendita), stato avanzamento (disponibile, opzionato, compromesso, rogitato), documentazione associata (planimetrie, render, capitolato, atti) e geolocalizzazione con integrazione mappe per visualizzazione progetti e zone di competenza.
+Gestione Contatti e Lead Management Acquisizione multi-canale dei contatti (whattapp, mail, scrittura manuale all’interno della piattaforma) con tracciamento completo della provenienza. Segmentazione per cluster (investitore, prima casa, upgrade, secondo immobile) e gestione del ciclo di vita completo dal primo contatto al post-vendita.
+Pipeline Commerciale e Deal Management Pipeline configurabile per fasi (qualifica → visita → proposta → trattativa → compromesso → rogito) con tempi medi attesi per fase e alert su stalli. Gestione delle proposte d'acquisto con workflow approvativo, tracking delle trattative con storico offerte/controfferte, e visibilità completa sull'avanzamento di ogni deal per agente, agenzia e progetto.
+Calendario e Gestione Appuntamenti Pianificazione visite agli immobili con disponibilità agenti e unità, prenotazione automatica videocall e visite in loco da parte dei lead, sincronizzazione con calendari esterni (Google, Outlook), e gestione risorse condivise (sale riunioni, showroom, appartamenti campione).
+Reportistica e Analytics Dashboard real-time con KPI chiave
+A tale struttura si richiede un modulo per la gestione automatica delle campagne pubblicitarie/mail. 
+Si richiede di poter inoltrare ad una specifica lista uno specifico messaggio mail e di tracciare i feedback di ciascun lead. 
+Da qui è necessario che un agente dedicato risponda in automatico al lead in funzione al suo background tracciato all’interno del CRM e concluda l’operazione fissando un appuntamento fisico o una video CALL.
+Il processo svolto dall’agente deve essere tracciato per permettere al reparto vendite di aver segmentato il soggetto con cui si interfaccerà e poter specializzarsi alle sue richieste e profilo. 
+Tempistiche e Budget
+Ottimale entro il weekend così da proiettare l’output al cliente. 
+Il cliente sta crescendo molto nell’ultimo periodo e sistemi che snelliscono ed efficientano il processo di vendita sono ad-hoc per la loro realtà. 
+Personal Opinion: 
+Il cliente è può essere interessato anche ad una gestione dei clienti tramite CRM ed uno strumento di scraping automatico.
+Per un applicativo sviluppato in toto il deal può essere venduto per una cifra di circa 20.000€

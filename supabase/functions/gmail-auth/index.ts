@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -173,10 +173,7 @@ Deno.serve(async (req: Request) => {
         return createErrorResponse(500, delError.message);
       }
 
-      return new Response(
-        JSON.stringify({ success: true }),
-        { headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
+      return createJsonResponse({ success: true });
     }
 
     return createErrorResponse(400, "Invalid action");

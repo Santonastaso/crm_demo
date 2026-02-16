@@ -1,6 +1,7 @@
 import { useListContext, useRecordContext } from "ra-core";
 import { ReferenceManyField, ReferenceField } from "@/components/admin";
 import { format } from "date-fns";
+import { formatEUR } from "@/lib/formatPrice";
 import {
   Mail,
   Phone,
@@ -122,7 +123,7 @@ const InteractionCard = ({ interaction }: { interaction: DealInteraction }) => {
             <div className="flex items-center gap-2 text-sm">
               {interaction.amount != null && (
                 <span className="font-medium">
-                  €{Number(interaction.amount).toLocaleString("it-IT")}
+                  {formatEUR(interaction.amount)}
                 </span>
               )}
               {interaction.offer_status && (

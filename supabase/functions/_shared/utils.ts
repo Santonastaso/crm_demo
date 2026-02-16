@@ -11,3 +11,10 @@ export function createErrorResponse(status: number, message: string) {
     status,
   });
 }
+
+export function createJsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
+}

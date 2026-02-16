@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 
 const PLACES_API_NEW = "https://places.googleapis.com/v1/places:searchNearby";
@@ -231,14 +231,11 @@ Deno.serve(async (req: Request) => {
       })
       .eq("id", scan_id);
 
-    return new Response(
-      JSON.stringify({
-        scan_id,
-        prospects_found: prospects.length,
-        status: "completed",
-      }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({
+      scan_id,
+      prospects_found: prospects.length,
+      status: "completed",
+    });
   } catch (err) {
     console.error("Discovery scan error:", err);
 

@@ -2,6 +2,7 @@ import { useRecordContext, useGetList } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { differenceInDays, differenceInWeeks } from "date-fns";
 import type { Deal, DealInteraction } from "../../types";
+import { formatEUR } from "@/lib/formatPrice";
 
 export const InteractionsDashboard = () => {
   const record = useRecordContext<Deal>();
@@ -67,11 +68,7 @@ export const InteractionsDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {record.amount.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-                minimumFractionDigits: 0,
-              })}
+              {formatEUR(record.amount)}
             </div>
           </CardContent>
         </Card>

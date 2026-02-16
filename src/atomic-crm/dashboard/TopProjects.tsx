@@ -1,6 +1,7 @@
 import { useGetList } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Project, PropertyUnit, Deal } from "../types";
+import { formatEUR } from "@/lib/formatPrice";
 import { useNavigate } from "react-router";
 
 export const TopProjects = () => {
@@ -56,7 +57,7 @@ export const TopProjects = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-medium">€{p.pipelineValue.toLocaleString("it-IT")}</div>
+                <div className="font-medium">{formatEUR(p.pipelineValue)}</div>
               </div>
             </div>
           ))}

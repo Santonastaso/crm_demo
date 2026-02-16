@@ -7,7 +7,8 @@ type CanAccessParams<
   record?: RecordType;
 };
 
-export type UserRole = "admin" | "manager" | "agent" | "read_only";
+import type { UserRole } from "@/atomic-crm/types";
+export type { UserRole };
 
 const ADMIN_ONLY_RESOURCES = ["sales"];
 const MANAGER_PLUS_RESOURCES = ["segments", "campaigns", "campaign_steps", "discovery_scans", "templates", "projects"];

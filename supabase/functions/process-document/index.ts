@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { generateEmbedding } from "../_shared/embeddings.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { extractText, getDocumentProxy } from "npm:unpdf";
@@ -104,14 +104,11 @@ Deno.serve(async (req: Request) => {
       .update({ status: "processed" })
       .eq("id", document_id);
 
-    return new Response(
-      JSON.stringify({
-        document_id,
-        chunks_created: chunks.length,
-        status: "processed",
-      }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({
+      document_id,
+      chunks_created: chunks.length,
+      status: "processed",
+    });
   } catch (err) {
     console.error("Error processing document:", err);
 

@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
+import { getContactById, contactFullName, primaryEmail } from "../_shared/contactUtils.ts";
 
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
@@ -25,6 +26,7 @@ Deno.serve(async (req: Request) => {
     event_type_id,
     name,
     email,
+    notes,
   } = await req.json();
 
   // Resolve contact name/email from DB if contact_id provided
@@ -32,19 +34,11 @@ Deno.serve(async (req: Request) => {
   let contactEmail = email ?? "";
 
   if (contact_id && (!name || !email)) {
-    const { data: contact } = await supabaseAdmin
-      .from("contacts")
-      .select("first_name, last_name, email_jsonb")
-      .eq("id", contact_id)
-      .single();
-
+    const contact = await getContactById(contact_id);
     if (contact) {
-      contactName =
-        `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() ||
-        "Prospect";
+      contactName = contactFullName(contact);
       if (!contactEmail) {
-        const emails: Array<{ email: string }> = contact.email_jsonb ?? [];
-        contactEmail = emails[0]?.email ?? "";
+        contactEmail = primaryEmail(contact) ?? "";
       }
     }
   }
@@ -61,7 +55,7 @@ Deno.serve(async (req: Request) => {
       .toISOString()
       .split("T")[0];
 
-    const slotsUrl = `${calcomBaseUrl}/slots?apiKey=${calcomApiKey}&startTime=${startDate}T00:00:00.000Z&endTime=${endDate}T23:59:59.000Z&eventTypeId=${event_type_id ?? 1}`;
+    const slotsUrl = `${calcomBaseUrl}/slots?apiKey=${calcomApiKey}&startTime=${startDate}T00:00:00.000Z&endTime=${endDate}T23:59:59.000Z&eventTypeId=${event_type_id ?? 4777077}`;
 
     const slotsResponse = await fetch(slotsUrl);
     const slotsData = await slotsResponse.json();
@@ -79,27 +73,32 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({ slots: allSlots.slice(0, 20) }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({ slots: allSlots.slice(0, 20) });
   }
 
   // Action: "book" — create a booking
-  const startTime = preferred_time
-    ? `${date}T${preferred_time}:00.000Z`
-    : `${date}T10:00:00.000Z`;
+  // preferred_time can be HH:MM or a full ISO timestamp
+  let startTime: string;
+  if (preferred_time && preferred_time.includes("T")) {
+    startTime = preferred_time; // already a full ISO string
+  } else if (preferred_time) {
+    startTime = `${date}T${preferred_time}:00.000Z`;
+  } else {
+    startTime = `${date}T10:00:00.000Z`;
+  }
 
   const bookingPayload = {
-    eventTypeId: event_type_id ?? 1,
+    eventTypeId: event_type_id ?? 4777077,
     start: startTime,
+    language: "it",
     responses: {
       name: contactName,
       email: contactEmail,
+      notes: notes || `CRM booking for ${contactName}`,
     },
     metadata: {
-      contact_id: contact_id ?? null,
-      conversation_id: conversation_id ?? null,
+      contact_id: String(contact_id ?? ""),
+      conversation_id: String(conversation_id ?? ""),
     },
     timeZone: "Europe/Rome",
   };
@@ -137,13 +136,10 @@ Deno.serve(async (req: Request) => {
     .select("*")
     .single();
 
-  return new Response(
-    JSON.stringify({
-      booking_id: booking?.id,
-      calcom_event_id: bookingResult.id ?? bookingResult.uid,
-      scheduled_at: startTime,
-      status: "confirmed",
-    }),
-    { headers: { "Content-Type": "application/json", ...corsHeaders } },
-  );
+  return createJsonResponse({
+    booking_id: booking?.id,
+    calcom_event_id: bookingResult.id ?? bookingResult.uid,
+    scheduled_at: startTime,
+    status: "confirmed",
+  });
 });

@@ -9,13 +9,8 @@ import { useState } from "react";
 import { Trash2, Plus, GripVertical } from "lucide-react";
 import { supabase } from "@/atomic-crm/providers/supabase/supabase";
 import type { Project, PropertyUnit, ProjectPipeline } from "../types";
-
-const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  disponibile: "default",
-  opzionato: "secondary",
-  compromesso: "outline",
-  rogitato: "destructive",
-};
+import { UNIT_STATUS_COLORS } from "../property-units/unitStatus";
+import { formatEUR } from "@/lib/formatPrice";
 
 const ProjectUnits = ({ projectId }: { projectId: number }) => {
   const { data: units } = useGetList<PropertyUnit>("property_units", {
@@ -51,13 +46,13 @@ const ProjectUnits = ({ projectId }: { projectId: number }) => {
         <div className="flex gap-4 mb-3 text-sm flex-wrap">
           {Object.entries(statusCounts).map(([status, count]) => (
             <div key={status} className="flex items-center gap-1">
-              <Badge variant={STATUS_COLORS[status] ?? "outline"} className="text-xs">{status}</Badge>
+              <Badge variant={UNIT_STATUS_COLORS[status] ?? "outline"} className="text-xs">{status}</Badge>
               <span className="font-medium">{count}</span>
             </div>
           ))}
           {totalValue > 0 && (
             <div className="text-muted-foreground ml-auto">
-              Total: €{totalValue.toLocaleString("it-IT")}
+              Total: {formatEUR(totalValue)}
             </div>
           )}
         </div>
@@ -75,8 +70,8 @@ const ProjectUnits = ({ projectId }: { projectId: number }) => {
                   {u.square_meters && <span className="text-muted-foreground">{u.square_meters}m²</span>}
                 </div>
                 <div className="flex items-center gap-2">
-                  {u.current_price && <span>€{Number(u.current_price).toLocaleString("it-IT")}</span>}
-                  <Badge variant={STATUS_COLORS[u.status] ?? "outline"} className="text-xs">{u.status}</Badge>
+                  {u.current_price && <span>{formatEUR(Number(u.current_price))}</span>}
+                  <Badge variant={UNIT_STATUS_COLORS[u.status] ?? "outline"} className="text-xs">{u.status}</Badge>
                 </div>
               </div>
             ))}

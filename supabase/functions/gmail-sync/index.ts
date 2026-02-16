@@ -1,9 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { getValidGmailToken } from "../_shared/gmailToken.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
+import { findContactByEmail } from "../_shared/contactUtils.ts";
 
 const GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1/users/me";
 
@@ -149,22 +150,7 @@ Deno.serve(async (req: Request) => {
           const direction = isOutbound ? "outbound" : "inbound";
 
           // Match counterparty email to a contact
-          // We search contacts.email_jsonb which is an array of { email, type }
-          const { data: contacts } = await supabaseAdmin
-            .from("contacts")
-            .select("id, email_jsonb")
-            .limit(500);
-
-          let contactId: number | null = null;
-          if (contacts) {
-            for (const c of contacts) {
-              const emails: Array<{ email: string }> = c.email_jsonb ?? [];
-              if (emails.some((e) => e.email?.toLowerCase() === counterpartyEmail)) {
-                contactId = c.id;
-                break;
-              }
-            }
-          }
+          const contactId = await findContactByEmail(counterpartyEmail);
 
           // Insert into communication_log
           const timestamp = date
@@ -206,8 +192,5 @@ Deno.serve(async (req: Request) => {
     results.push({ email: account.email_address, synced, errors });
   }
 
-  return new Response(
-    JSON.stringify({ results }),
-    { headers: { "Content-Type": "application/json", ...corsHeaders } },
-  );
+  return createJsonResponse({ results });
 });

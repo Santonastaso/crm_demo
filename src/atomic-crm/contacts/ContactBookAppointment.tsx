@@ -173,7 +173,9 @@ export const ContactBookAppointment = ({
                         className="cursor-pointer hover:bg-primary/10 transition-colors"
                         onClick={() => setSelectedSlot(slot)}
                       >
-                        {slot.time}
+                        {slot.time.includes("T")
+                          ? new Date(slot.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                          : slot.time}
                       </Badge>
                     );
                   })}
@@ -188,7 +190,10 @@ export const ContactBookAppointment = ({
             <p className="text-sm">
               Selected:{" "}
               <span className="font-medium">
-                {selectedSlot.date} at {selectedSlot.time}
+                {new Date(selectedSlot.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })} at{" "}
+                {selectedSlot.time.includes("T")
+                  ? new Date(selectedSlot.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                  : selectedSlot.time}
               </span>
             </p>
             <Button

@@ -1,8 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
+import { findContactByPhone } from "../_shared/contactUtils.ts";
 
 Deno.serve(async (req: Request) => {
   // WhatsApp webhook verification (GET)
@@ -44,13 +45,7 @@ Deno.serve(async (req: Request) => {
         if (!messageText) continue;
 
         // Find or create contact by phone number
-        const { data: existingContacts } = await supabaseAdmin
-          .from("contacts")
-          .select("id")
-          .contains("phone_jsonb", [{ number: fromPhone }])
-          .limit(1);
-
-        let contactId = existingContacts?.[0]?.id ?? null;
+        let contactId = await findContactByPhone(fromPhone);
 
         if (!contactId) {
           const profileName = value.contacts?.[0]?.profile?.name ?? "WhatsApp User";
@@ -137,7 +132,5 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  return new Response(JSON.stringify({ status: "ok" }), {
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+  return createJsonResponse({ status: "ok" });
 });

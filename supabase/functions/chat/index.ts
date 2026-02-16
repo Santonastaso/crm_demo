@@ -1,10 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { logCommunicationBatch } from "../_shared/communicationLog.ts";
 import { generateEmbedding } from "../_shared/embeddings.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
+import { getContactById, contactFullName, primaryEmail } from "../_shared/contactUtils.ts";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
@@ -204,15 +205,10 @@ async function executeTool(
       let contactName = "Prospect";
       let contactEmail = "prospect@crm.local";
       if (resolvedContactId) {
-        const { data: cRec } = await supabaseAdmin
-          .from("contacts")
-          .select("first_name, last_name, email_jsonb")
-          .eq("id", resolvedContactId)
-          .single();
+        const cRec = await getContactById(resolvedContactId);
         if (cRec) {
-          contactName = `${cRec.first_name ?? ""} ${cRec.last_name ?? ""}`.trim() || "Prospect";
-          const emails = cRec.email_jsonb ?? [];
-          contactEmail = emails[0]?.email ?? contactEmail;
+          contactName = contactFullName(cRec);
+          contactEmail = primaryEmail(cRec) ?? contactEmail;
         }
       }
 
@@ -485,14 +481,11 @@ Deno.serve(async (req: Request) => {
       ]);
     }
 
-    return new Response(
-      JSON.stringify({
-        conversation_id: conversationId,
-        response: aiResponseText,
-        tool_calls: allToolCalls,
-      }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
+    return createJsonResponse({
+      conversation_id: conversationId,
+      response: aiResponseText,
+      tool_calls: allToolCalls,
+    });
   } catch (err) {
     console.error("Chat handler error:", err);
     return createErrorResponse(

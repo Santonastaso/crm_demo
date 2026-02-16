@@ -4,13 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/atomic-crm/providers/supabase/supabase";
-
-interface ChatMessage {
-  id: string;
-  sender: "user" | "ai";
-  content: string;
-  timestamp: Date;
-}
+import type { ChatMessage } from "@/atomic-crm/chat/chatTypes";
 
 interface ChatWidgetProps {
   projectId?: number;

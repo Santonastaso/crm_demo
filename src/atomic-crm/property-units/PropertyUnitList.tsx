@@ -2,19 +2,14 @@ import { List, CreateButton, DataTable, ReferenceField, TextField } from "@/comp
 import { TopToolbar } from "../layout/TopToolbar";
 import { useRecordContext } from "ra-core";
 import { Badge } from "@/components/ui/badge";
-
-const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  disponibile: "default",
-  opzionato: "secondary",
-  compromesso: "outline",
-  rogitato: "destructive",
-};
+import { UNIT_STATUS_COLORS } from "./unitStatus";
+import { formatEUR } from "@/lib/formatPrice";
 
 const StatusBadge = () => {
   const record = useRecordContext();
   if (!record) return null;
   return (
-    <Badge variant={STATUS_COLORS[record.status] ?? "outline"}>
+    <Badge variant={UNIT_STATUS_COLORS[record.status] ?? "outline"}>
       {record.status}
     </Badge>
   );
@@ -25,7 +20,7 @@ const PriceField = () => {
   if (!record?.current_price) return <span className="text-muted-foreground">—</span>;
   return (
     <span>
-      €{Number(record.current_price).toLocaleString("it-IT")}
+      {formatEUR(Number(record.current_price))}
     </span>
   );
 };

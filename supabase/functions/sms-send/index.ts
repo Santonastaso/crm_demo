@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 
@@ -59,8 +59,5 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  return new Response(
-    JSON.stringify({ success: true, sms_sid: result.sid }),
-    { headers: { "Content-Type": "application/json", ...corsHeaders } },
-  );
+  return createJsonResponse({ success: true, sms_sid: result.sid });
 });

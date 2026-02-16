@@ -7,13 +7,9 @@ import { Upload, FileText, Trash2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { supabase } from "@/atomic-crm/providers/supabase/supabase";
 import type { Identifier } from "ra-core";
-
-const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  disponibile: "default",
-  opzionato: "secondary",
-  compromesso: "outline",
-  rogitato: "destructive",
-};
+import { UNIT_STATUS_COLORS } from "./unitStatus";
+import { formatEUR } from "@/lib/formatPrice";
+import type { UnitDocument } from "../types";
 
 const DOC_TYPE_CHOICES = [
   { id: "planimetria", name: "Planimetria" },
@@ -23,16 +19,6 @@ const DOC_TYPE_CHOICES = [
   { id: "foto", name: "Foto" },
   { id: "altro", name: "Altro" },
 ];
-
-interface UnitDocument {
-  id: Identifier;
-  unit_id: Identifier;
-  title: string;
-  doc_type: string;
-  file_path: string;
-  file_type: string;
-  created_at: string;
-}
 
 const UnitDocuments = ({ unitId }: { unitId: Identifier }) => {
   const { data: docs, isLoading } = useGetList<UnitDocument>("unit_documents", {
@@ -171,8 +157,7 @@ const PropertyUnitShowContent = () => {
   const { record, isPending } = useShowContext();
   if (isPending || !record) return null;
 
-  const fmt = (v: number | null | undefined) =>
-    v != null ? `€${Number(v).toLocaleString("it-IT")}` : "—";
+  const fmt = formatEUR;
 
   return (
     <div className="mt-2 max-w-3xl mx-auto space-y-4">
@@ -188,7 +173,7 @@ const PropertyUnitShowContent = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={STATUS_COLORS[record.status] ?? "outline"} className="text-sm">
+              <Badge variant={UNIT_STATUS_COLORS[record.status] ?? "outline"} className="text-sm">
                 {record.status}
               </Badge>
               <EditButton />
