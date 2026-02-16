@@ -1,35 +1,12 @@
-import { CreateBase, Form, useGetIdentity, useNotify, useRedirect } from "ra-core";
+import { CreateBase, Form, useGetIdentity } from "ra-core";
 import { Card, CardContent } from "@/components/ui/card";
 import { CancelButton, SaveButton, FormToolbar } from "@/components/admin";
 import { SegmentInputs } from "./SegmentInputs";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
-import { useCallback } from "react";
+import { useSegmentRefreshOnSuccess } from "./useSegmentRefresh";
 
 export const SegmentCreate = () => {
   const { identity } = useGetIdentity();
-  const notify = useNotify();
-  const redirect = useRedirect();
-
-  const onSuccess = useCallback(
-    async (data: { id: number }) => {
-      try {
-        const { data: result, error } = await supabase.functions.invoke(
-          "segments-refresh",
-          { method: "POST", body: { segment_id: data.id } },
-        );
-        if (error) throw error;
-        notify(
-          `Segment created and refreshed: ${result?.contact_count ?? 0} contacts matched`,
-        );
-      } catch {
-        notify("Segment created but auto-refresh failed. Refresh manually.", {
-          type: "warning",
-        });
-      }
-      redirect("list", "segments");
-    },
-    [notify, redirect],
-  );
+  const onSuccess = useSegmentRefreshOnSuccess("created");
 
   return (
     <CreateBase redirect={false} mutationOptions={{ onSuccess }}>

@@ -3,39 +3,37 @@ import { Mars, NonBinary, Venus } from "lucide-react";
 export const defaultDarkModeLogo = "";
 export const defaultLightModeLogo = "";
 
-export const defaultTitle = "Pinger Demo";
+export const defaultTitle = "Arte di Abitare CRM";
 
 export const defaultCompanySectors = [
-  "Communication Services",
-  "Consumer Discretionary",
-  "Consumer Staples",
-  "Energy",
-  "Financials",
-  "Health Care",
-  "Industrials",
-  "Information Technology",
-  "Materials",
-  "Real Estate",
-  "Utilities",
+  "Costruzioni",
+  "Immobiliare",
+  "Finanziario",
+  "Legale",
+  "Architettura",
+  "Interior Design",
+  "Consulenza",
+  "Altro",
 ];
 
 export const defaultDealStages = [
-  { value: "opportunity", label: "Opportunity" },
-  { value: "proposal-sent", label: "Proposal Sent" },
-  { value: "in-negociation", label: "In Negotiation" },
-  { value: "won", label: "Won" },
-  { value: "lost", label: "Lost" },
-  { value: "delayed", label: "Delayed" },
+  { value: "qualifica", label: "Qualifica" },
+  { value: "visita", label: "Visita" },
+  { value: "proposta", label: "Proposta" },
+  { value: "trattativa", label: "Trattativa" },
+  { value: "compromesso", label: "Compromesso" },
+  { value: "rogito", label: "Rogito" },
+  { value: "perso", label: "Perso" },
 ];
 
-export const defaultDealPipelineStatuses = ["won"];
+export const defaultDealPipelineStatuses = ["rogito"];
 
 export const defaultDealCategories = [
-  "Other",
-  "Copywriting",
-  "Print project",
-  "UI Design",
-  "Website design",
+  "Prima Casa",
+  "Investimento",
+  "Upgrade",
+  "Secondo Immobile",
+  "Commerciale",
 ];
 
 export const defaultNoteStatuses = [

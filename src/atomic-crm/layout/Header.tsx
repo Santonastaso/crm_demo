@@ -15,6 +15,7 @@ const Header = () => {
     { label: 'Companies', to: '/companies' },
     { label: 'Deals', to: '/deals' },
     { label: 'Projects', to: '/projects' },
+    { label: 'Units', to: '/property_units' },
     { label: 'Segments', to: '/segments' },
     { label: 'Templates', to: '/templates' },
     { label: 'Campaigns', to: '/campaigns' },

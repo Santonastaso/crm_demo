@@ -29,6 +29,9 @@ const DealList = () => {
 
   const dealFilters = [
     <SearchInput source="q" alwaysOn />,
+    <ReferenceInput source="project_id" reference="projects">
+      <AutocompleteInput label={false} placeholder="Project" />
+    </ReferenceInput>,
     <ReferenceInput source="company_id" reference="companies">
       <AutocompleteInput label={false} placeholder="Company" />
     </ReferenceInput>,

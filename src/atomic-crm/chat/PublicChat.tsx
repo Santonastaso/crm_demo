@@ -137,10 +137,10 @@ export const PublicChat = () => {
         <MessageCircle size={24} />
         <div>
           <div style={{ fontWeight: 600, fontSize: "16px" }}>
-            Real Estate Assistant
+            Arte di Abitare
           </div>
           <div style={{ fontSize: "12px", opacity: 0.7 }}>
-            Ask about properties, pricing, and availability
+            Assistente immobiliare — Chiedi di immobili, prezzi e disponibilità
           </div>
         </div>
       </div>
@@ -172,10 +172,9 @@ export const PublicChat = () => {
               size={48}
               style={{ margin: "0 auto 16px", opacity: 0.3 }}
             />
-            <p style={{ fontWeight: 500 }}>Welcome!</p>
+            <p style={{ fontWeight: 500 }}>Benvenuto!</p>
             <p style={{ marginTop: "4px" }}>
-              Ask me anything about our real estate projects, properties, or
-              services.
+              Chiedimi informazioni sui nostri progetti immobiliari, unità disponibili e servizi.
             </p>
           </div>
         )}
@@ -244,7 +243,7 @@ export const PublicChat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type a message..."
+            placeholder="Scrivi un messaggio..."
             disabled={isLoading}
             style={{
               flex: 1,

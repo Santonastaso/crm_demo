@@ -1,8 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { getValidGmailToken } from "../_shared/gmailToken.ts";
+import { logCommunication } from "../_shared/communicationLog.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
 
-const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1/users/me";
 
 interface GmailMessage {
@@ -20,51 +22,6 @@ interface GmailMessage {
     }>;
   };
   internalDate: string;
-}
-
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
-  const clientId = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID");
-  const clientSecret = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
-  if (!clientId || !clientSecret) return null;
-
-  const response = await fetch(GOOGLE_TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    }),
-  });
-
-  if (!response.ok) return null;
-  const data = await response.json();
-  return data.access_token ?? null;
-}
-
-async function getValidToken(account: Record<string, any>): Promise<string> {
-  const now = new Date();
-  const expiry = account.token_expires_at ? new Date(account.token_expires_at) : new Date(0);
-
-  if (now < expiry) {
-    return account.access_token;
-  }
-
-  const newToken = await refreshAccessToken(account.refresh_token);
-  if (!newToken) {
-    throw new Error("Failed to refresh Gmail token");
-  }
-
-  await supabaseAdmin
-    .from("email_accounts")
-    .update({
-      access_token: newToken,
-      token_expires_at: new Date(Date.now() + 3500 * 1000).toISOString(),
-    })
-    .eq("id", account.id);
-
-  return newToken;
 }
 
 function getHeader(headers: Array<{ name: string; value: string }>, name: string): string {
@@ -100,13 +57,8 @@ function getBodyText(payload: GmailMessage["payload"]): string {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const { sales_id } = await req.json();
 
@@ -129,7 +81,12 @@ Deno.serve(async (req: Request) => {
     let errors = 0;
 
     try {
-      const token = await getValidToken(account);
+      const token = await getValidGmailToken(
+        account.id,
+        account.access_token,
+        account.refresh_token,
+        account.token_expires_at,
+      );
 
       // Build query: fetch messages since last sync
       const lastSync = account.last_synced_at
@@ -214,7 +171,7 @@ Deno.serve(async (req: Request) => {
             ? new Date(date).toISOString()
             : new Date(parseInt(msg.internalDate, 10)).toISOString();
 
-          await supabaseAdmin.from("communication_log").insert({
+          await logCommunication({
             contact_id: contactId,
             channel: "email",
             direction,

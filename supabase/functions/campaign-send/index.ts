@@ -1,9 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+import { requirePost } from "../_shared/requestHandler.ts";
+import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
 
 function renderTemplate(
   template: string,
@@ -39,18 +38,11 @@ async function sendViaChannel(
     const phone = (contact.phone_jsonb ?? [])[0]?.number;
     if (!phone) return { status: "failed" };
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/whatsapp-send`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        to: phone,
-        message,
-        contact_id: contactId,
-        project_id: projectId,
-      }),
+    const response = await invokeEdgeFunction("whatsapp-send", {
+      to: phone,
+      message,
+      contact_id: contactId,
+      project_id: projectId,
     });
 
     const result = await response.json();
@@ -63,18 +55,11 @@ async function sendViaChannel(
     const phone = (contact.phone_jsonb ?? [])[0]?.number;
     if (!phone) return { status: "failed" };
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/sms-send`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        to: phone,
-        message,
-        contact_id: contactId,
-        project_id: projectId,
-      }),
+    const response = await invokeEdgeFunction("sms-send", {
+      to: phone,
+      message,
+      contact_id: contactId,
+      project_id: projectId,
     });
 
     const result = await response.json();
@@ -91,21 +76,14 @@ async function sendViaChannel(
     // Generate tracking_id upfront for open/click tracking
     const trackingId = crypto.randomUUID();
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/gmail-send`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        to: email,
-        subject: subject ?? "No subject",
-        body_html: `<div>${message.replace(/\n/g, "<br>")}</div>`,
-        contact_id: contactId,
-        project_id: projectId,
-        sales_id: salesId,
-        tracking_id: trackingId,
-      }),
+    const response = await invokeEdgeFunction("gmail-send", {
+      to: email,
+      subject: subject ?? "No subject",
+      body_html: `<div>${message.replace(/\n/g, "<br>")}</div>`,
+      contact_id: contactId,
+      project_id: projectId,
+      sales_id: salesId,
+      tracking_id: trackingId,
     });
 
     if (response.ok) {
@@ -119,13 +97,8 @@ async function sendViaChannel(
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const { campaign_id } = await req.json();
 
@@ -154,16 +127,8 @@ Deno.serve(async (req: Request) => {
     .update({ status: "sending" })
     .eq("id", campaign_id);
 
-  // Auto-refresh segment membership before sending
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/segments-refresh`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ segment_id: campaign.segment_id }),
-    });
+    await invokeEdgeFunction("segments-refresh", { segment_id: campaign.segment_id });
   } catch (refreshErr) {
     console.error("Segment refresh before send failed:", refreshErr);
   }

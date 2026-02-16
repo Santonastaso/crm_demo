@@ -5,11 +5,13 @@ import {
   Mail,
   Phone,
   Users,
-  Presentation,
+  Eye,
   FileText,
   MessageSquare,
   Clock,
   MoreHorizontal,
+  PenLine,
+  Handshake,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -19,14 +21,22 @@ import { InteractionCreate } from "./InteractionCreate";
 import { Button } from "@/components/ui/button";
 
 const interactionIcons: Record<string, any> = {
-  Email: Mail,
   Chiamata: Phone,
-  Meeting: Users,
-  Demo: Presentation,
+  Email: Mail,
+  Visita: Eye,
   Proposta: FileText,
-  Negoziazione: MessageSquare,
+  Controfferta: MessageSquare,
+  Trattativa: Handshake,
+  Firma: PenLine,
   "Follow-up": Clock,
   Altro: MoreHorizontal,
+};
+
+const offerStatusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  pending: "secondary",
+  accepted: "default",
+  rejected: "destructive",
+  countered: "outline",
 };
 
 const sentimentColors: Record<string, string> = {
@@ -107,6 +117,21 @@ const InteractionCard = ({ interaction }: { interaction: DealInteraction }) => {
               {format(new Date(interaction.date), "PPp")}
             </div>
           </div>
+
+          {(interaction.amount != null || interaction.offer_status) && (
+            <div className="flex items-center gap-2 text-sm">
+              {interaction.amount != null && (
+                <span className="font-medium">
+                  €{Number(interaction.amount).toLocaleString("it-IT")}
+                </span>
+              )}
+              {interaction.offer_status && (
+                <Badge variant={offerStatusColors[interaction.offer_status] ?? "outline"}>
+                  {interaction.offer_status}
+                </Badge>
+              )}
+            </div>
+          )}
 
           {interaction.duration && (
             <div className="text-sm text-muted-foreground">

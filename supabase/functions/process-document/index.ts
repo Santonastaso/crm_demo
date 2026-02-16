@@ -1,6 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
-import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { corsHeaders } from "../_shared/utils.ts";
+import { generateEmbedding } from "../_shared/embeddings.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
 import { extractText, getDocumentProxy } from "npm:unpdf";
 
 const CHUNK_SIZE = 1000;
@@ -19,49 +21,9 @@ function chunkText(text: string): string[] {
   return chunks;
 }
 
-async function generateEmbedding(text: string): Promise<number[]> {
-  const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
-
-  if (!anthropicKey) {
-    // Fallback: generate a zero vector if no API key. Placeholder for when key is available.
-    console.warn("ANTHROPIC_API_KEY not set. Using zero embedding placeholder.");
-    return new Array(1536).fill(0);
-  }
-
-  // Use Anthropic's partner embedding model or an alternative.
-  // For now, use a simple fetch to an embedding endpoint.
-  // In production, switch to Voyage AI or OpenAI embeddings.
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
-  if (openaiKey) {
-    const response = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openaiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "text-embedding-3-small",
-        input: text,
-      }),
-    });
-
-    const result = await response.json();
-    return result.data[0].embedding;
-  }
-
-  // No embedding API available — return zero vector
-  console.warn("No embedding API key available. Using zero vector.");
-  return new Array(1536).fill(0);
-}
-
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const { document_id } = await req.json();
 
@@ -123,13 +85,15 @@ Deno.serve(async (req: Request) => {
       .delete()
       .eq("document_id", document_id);
 
-    // Generate embeddings and insert chunks
     for (let i = 0; i < chunks.length; i++) {
       const embedding = await generateEmbedding(chunks[i]);
+      if (!embedding) {
+        throw new Error("Failed to generate embedding — check OPENAI_API_KEY");
+      }
       await supabaseAdmin.from("document_chunks").insert({
         document_id,
         content: chunks[i],
-        embedding: embedding,
+        embedding,
         chunk_index: i,
       });
     }

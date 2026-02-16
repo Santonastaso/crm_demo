@@ -1,17 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { logCommunication } from "../_shared/communicationLog.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
 
 const WHATSAPP_API_URL = "https://graph.facebook.com/v21.0";
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
   const accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
@@ -83,9 +79,8 @@ Deno.serve(async (req: Request) => {
 
   const waMessageId = result.messages?.[0]?.id;
 
-  // Log to communication_log
   if (contact_id) {
-    await supabaseAdmin.from("communication_log").insert({
+    await logCommunication({
       contact_id,
       project_id: project_id ?? null,
       channel: "whatsapp",

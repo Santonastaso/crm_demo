@@ -177,10 +177,23 @@ const ContactPersonalInformationInputs = () => {
 
 const personalInfoTypes = [{ id: "Work" }, { id: "Home" }, { id: "Other" }];
 
+const LEAD_TYPE_CHOICES = [
+  { id: "investitore", name: "Investitore" },
+  { id: "prima_casa", name: "Prima Casa" },
+  { id: "upgrade", name: "Upgrade" },
+  { id: "secondo_immobile", name: "Secondo Immobile" },
+];
+
 const ContactMiscInputs = () => {
   return (
     <div className="flex flex-col gap-4">
       <h6 className="text-lg font-semibold">Misc</h6>
+      <SelectInput
+        source="lead_type"
+        label="Lead Type"
+        choices={LEAD_TYPE_CHOICES}
+        helperText={false}
+      />
       <TextInput
         source="background"
         label="Background info (bio, how you met, etc)"

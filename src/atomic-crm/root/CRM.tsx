@@ -24,6 +24,7 @@ import conversations from "../conversations";
 import discovery from "../discovery";
 import campaigns from "../campaigns";
 import bookings from "../bookings";
+import propertyUnits from "../property-units";
 import { PublicChat } from "../chat/PublicChat";
 import { SettingsPage } from "../settings/SettingsPage";
 import { EmailSettingsPage } from "../settings/EmailSettingsPage";
@@ -183,6 +184,9 @@ export const CRM = ({
         <Resource name="knowledge_documents" {...knowledge} />
         <Resource name="bookings" {...bookings} />
         <Resource name="discovery_scans" {...discovery} />
+        <Resource name="property_units" {...propertyUnits} />
+        <Resource name="project_pipelines" />
+        <Resource name="unit_documents" />
         <Resource name="discovery_prospects" />
         <Resource name="campaigns" {...campaigns} />
         <Resource name="campaign_steps" />

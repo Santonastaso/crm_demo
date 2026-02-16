@@ -103,6 +103,7 @@ export type Contact = {
   status: string;
   background: string;
   phone_jsonb: PhoneNumberAndType[];
+  lead_type?: string;
   nb_tasks?: number;
   company_name?: string;
 } & Pick<RaRecord, "id">;
@@ -130,6 +131,7 @@ export type Deal = {
   expected_closing_date: string;
   sales_id: Identifier;
   project_id?: Identifier;
+  unit_id?: Identifier;
   index: number;
 } & Pick<RaRecord, "id">;
 
@@ -154,6 +156,8 @@ export type DealInteraction = {
   notes?: string;
   attachments?: AttachmentNote[];
   sentiment?: string;
+  amount?: number;
+  offer_status?: string;
 } & Pick<RaRecord, "id">;
 
 export type Reminder = {
@@ -270,6 +274,35 @@ export type Project = {
   location_lng?: number;
   status: "active" | "archived";
   config?: Record<string, unknown>;
+  created_at: string;
+} & Pick<RaRecord, "id">;
+
+export type PropertyUnit = {
+  project_id: Identifier;
+  code: string;
+  typology?: string;
+  floor?: number;
+  orientation?: string;
+  square_meters?: number;
+  rooms?: number;
+  bathrooms?: number;
+  energy_class?: string;
+  base_price?: number;
+  current_price?: number;
+  discount_pct?: number;
+  status: "disponibile" | "opzionato" | "compromesso" | "rogitato";
+  description?: string;
+  features?: string[];
+  created_at: string;
+  updated_at: string;
+} & Pick<RaRecord, "id">;
+
+export type UnitDocument = {
+  unit_id: Identifier;
+  title: string;
+  doc_type?: string;
+  file_path: string;
+  file_type?: string;
   created_at: string;
 } & Pick<RaRecord, "id">;
 

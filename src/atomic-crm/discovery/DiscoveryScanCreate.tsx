@@ -1,4 +1,4 @@
-import { CreateBase, Form, useGetOne } from "ra-core";
+import { CreateBase, Form, useGetOne, required } from "ra-core";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   CancelButton,
@@ -10,7 +10,6 @@ import {
   ReferenceInput,
   AutocompleteArrayInput,
 } from "@/components/admin";
-import { required } from "ra-core";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect } from "react";
 

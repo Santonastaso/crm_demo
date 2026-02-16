@@ -25,15 +25,18 @@ import { FileInput } from "@/components/admin/file-input";
 import type { Deal } from "../../types";
 
 const interactionTypes = [
-  "Email",
   "Chiamata",
-  "Meeting",
-  "Demo",
+  "Email",
+  "Visita",
   "Proposta",
-  "Negoziazione",
+  "Controfferta",
+  "Trattativa",
+  "Firma",
   "Follow-up",
   "Altro",
 ];
+
+const offerStatuses = ["pending", "accepted", "rejected", "countered"];
 
 const sentiments = ["Positivo", "Neutro", "Negativo", "Critico"];
 
@@ -127,6 +130,42 @@ const InteractionInputs = ({ dealRecord }: { dealRecord: Deal }) => {
           </Select>
         </div>
       </div>
+
+      {(currentType === "Proposta" || currentType === "Controfferta") && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount (€)</Label>
+            <Input
+              type="number"
+              id="amount"
+              placeholder="250000"
+              min="0"
+              step="1000"
+              onChange={(e) =>
+                setValue("amount", e.target.value ? parseFloat(e.target.value) : null)
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="offer_status">Offer Status</Label>
+            <Select
+              value={watch("offer_status") || ""}
+              onValueChange={(value) => setValue("offer_status", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {offerStatuses.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
 
       {dealRecord.contact_ids && dealRecord.contact_ids.length > 0 && (
         <div className="space-y-2">

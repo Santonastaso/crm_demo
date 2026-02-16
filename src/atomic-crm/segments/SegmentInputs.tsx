@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 
 const FIELD_CHOICES = [
   { id: "status", name: "Status" },
+  { id: "lead_type", name: "Lead Type" },
   { id: "tags", name: "Tags" },
   { id: "company_id", name: "Company" },
   { id: "sales_id", name: "Assigned Agent" },

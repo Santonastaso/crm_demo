@@ -1,17 +1,26 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { logCommunicationBatch } from "../_shared/communicationLog.ts";
+import { generateEmbedding } from "../_shared/embeddings.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
+import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
-const SYSTEM_PROMPT = `You are an AI sales assistant for a real estate agency. You help potential buyers and partners with information about real estate projects, properties, and services.
+const SYSTEM_PROMPT = `You are the AI assistant for Arte di Abitare, part of Industrie Edili Holding — a leading Italian real estate developer. You help potential buyers, investors, and partners with information about our residential and commercial projects.
+
+ABOUT US:
+- Arte di Abitare develops high-quality residential complexes, apartments, villas, and commercial spaces across Italy
+- Property types: appartamenti, attici, bilocali, trilocali, quadrilocali, ville, uffici, spazi commerciali
+- We handle the full lifecycle: from project launch through qualification, visits, proposals, negotiation, compromise, to rogito (deed signing)
 
 CAPABILITIES:
 - Answer questions about properties, floor plans, pricing, payment methods, expected returns, taxation, and purchase processes
-- Support Italian, English, and German languages (detect automatically)
-- Capture lead information (name, email, phone, budget, interest type) naturally during conversation
-- Search the knowledge base for specific property and project details
-- Book video calls with sales representatives when the prospect is ready
+- Support Italian, English, and German languages (detect automatically, default to Italian)
+- Capture lead information (name, email, phone, budget, interest type: investitore/prima_casa/upgrade/secondo_immobile) naturally during conversation
+- Search the knowledge base for specific property and project details (planimetrie, capitolati, render, etc.)
+- Book video calls or site visits with sales representatives when the prospect is ready
 - Escalate to human agents when the conversation exceeds your scope
 
 GUARDRAILS:
@@ -19,7 +28,7 @@ GUARDRAILS:
 - NEVER close sales or sign preliminary agreements
 - NEVER communicate unauthorized prices or conditions not found in the knowledge base
 - ALWAYS escalate requests outside your configured scope
-- Be professional, warm, and helpful
+- Be professional, warm, and helpful — use a conversational Italian tone when speaking Italian
 - When presenting tool results (like available slots or booking confirmations), integrate them naturally into your response`;
 
 interface ClaudeMessage {
@@ -27,31 +36,11 @@ interface ClaudeMessage {
   content: string | Array<Record<string, unknown>>;
 }
 
-async function generateQueryEmbedding(query: string): Promise<number[] | null> {
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiKey) return null;
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openaiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: "text-embedding-3-small", input: query }),
-    });
-    const result = await response.json();
-    return result.data?.[0]?.embedding ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function searchKnowledgeBase(
   query: string,
   projectId: number | null,
 ): Promise<string> {
-  const embedding = await generateQueryEmbedding(query);
+  const embedding = await generateEmbedding(query);
 
   if (embedding) {
     const { data, error } = await supabaseAdmin.rpc("match_document_chunks", {
@@ -211,8 +200,6 @@ async function executeTool(
     }
     case "book_videocall": {
       const bookingInput = toolInput as Record<string, string>;
-      const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
       let contactName = "Prospect";
       let contactEmail = "prospect@crm.local";
@@ -242,14 +229,7 @@ async function executeTool(
       }
 
       try {
-        const bookRes = await fetch(`${supabaseUrl}/functions/v1/book-videocall`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bookPayload),
-        });
+        const bookRes = await invokeEdgeFunction("book-videocall", bookPayload);
 
         const bookData = await bookRes.json();
         if (bookRes.ok && bookData.booking_id) {
@@ -302,13 +282,8 @@ async function callClaude(
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   let body: Record<string, unknown>;
   try {
@@ -491,9 +466,8 @@ Deno.serve(async (req: Request) => {
       metadata: { tool_calls: allToolCalls },
     });
 
-    // Log to communication_log
     if (finalContactId) {
-      await supabaseAdmin.from("communication_log").insert([
+      await logCommunicationBatch([
         {
           contact_id: finalContactId,
           project_id: resolvedProjectId,

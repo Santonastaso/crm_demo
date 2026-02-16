@@ -1,10 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
-
-const CHAT_FUNCTION_URL = Deno.env.get("SUPABASE_URL")
-  ? `${Deno.env.get("SUPABASE_URL")}/functions/v1/chat`
-  : "";
+import { logCommunication } from "../_shared/communicationLog.ts";
+import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
 
 Deno.serve(async (req: Request) => {
   // WhatsApp webhook verification (GET)
@@ -103,51 +101,31 @@ Deno.serve(async (req: Request) => {
           conversationId = newConv?.id ?? null;
         }
 
-        // Route to chat AI and send reply back via WhatsApp
-        if (CHAT_FUNCTION_URL) {
-          const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-          const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-          try {
-            const chatResponse = await fetch(CHAT_FUNCTION_URL, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${serviceKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                message: messageText,
-                conversation_id: conversationId,
+        try {
+          const chatResponse = await invokeEdgeFunction("chat", {
+            message: messageText,
+            conversation_id: conversationId,
+            contact_id: contactId,
+          });
+
+          if (chatResponse.ok) {
+            const chatData = await chatResponse.json();
+            const aiReply = chatData?.response;
+
+            if (aiReply && fromPhone) {
+              await invokeEdgeFunction("whatsapp-send", {
+                to: fromPhone,
+                message: aiReply,
                 contact_id: contactId,
-              }),
-            });
-
-            if (chatResponse.ok) {
-              const chatData = await chatResponse.json();
-              const aiReply = chatData?.response;
-
-              if (aiReply && fromPhone) {
-                await fetch(`${supabaseUrl}/functions/v1/whatsapp-send`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${serviceKey}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    to: fromPhone,
-                    message: aiReply,
-                    contact_id: contactId,
-                  }),
-                });
-              }
+              });
             }
-          } catch (err) {
-            console.error("Chat/reply error:", err);
           }
+        } catch (err) {
+          console.error("Chat/reply error:", err);
         }
 
-        // Log inbound message
         if (contactId) {
-          await supabaseAdmin.from("communication_log").insert({
+          await logCommunication({
             contact_id: contactId,
             channel: "whatsapp",
             direction: "inbound",

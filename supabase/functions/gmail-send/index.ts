@@ -1,8 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { getValidGmailToken } from "../_shared/gmailToken.ts";
+import { logCommunication } from "../_shared/communicationLog.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
 
-const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GMAIL_SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send";
 
 interface SendRequest {
@@ -33,62 +35,6 @@ function injectTracking(html: string, trackingId: string): string {
   );
 
   return withLinks + pixel;
-}
-
-async function refreshAccessToken(
-  refreshToken: string,
-): Promise<{ access_token: string; expires_in: number } | null> {
-  const clientId = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID");
-  const clientSecret = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET");
-
-  if (!clientId || !clientSecret) return null;
-
-  const response = await fetch(GOOGLE_TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    }),
-  });
-
-  if (!response.ok) return null;
-  return await response.json();
-}
-
-async function getValidToken(
-  accountId: number,
-  accessToken: string,
-  refreshToken: string,
-  expiresAt: string | null,
-): Promise<string> {
-  const now = new Date();
-  const expiry = expiresAt ? new Date(expiresAt) : new Date(0);
-
-  if (now < expiry) {
-    return accessToken;
-  }
-
-  const refreshed = await refreshAccessToken(refreshToken);
-  if (!refreshed) {
-    throw new Error("Failed to refresh Gmail access token");
-  }
-
-  const newExpiry = new Date(
-    Date.now() + refreshed.expires_in * 1000,
-  ).toISOString();
-
-  await supabaseAdmin
-    .from("email_accounts")
-    .update({
-      access_token: refreshed.access_token,
-      token_expires_at: newExpiry,
-    })
-    .eq("id", accountId);
-
-  return refreshed.access_token;
 }
 
 function buildRawEmail(
@@ -134,13 +80,8 @@ function base64UrlEncode(str: string): string {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const body: SendRequest = await req.json();
   const { to, subject, body_html, body_text, contact_id, project_id, sales_id, tracking_id } = body;
@@ -162,7 +103,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const validToken = await getValidToken(
+    const validToken = await getValidGmailToken(
       account.id,
       account.access_token,
       account.refresh_token,
@@ -199,8 +140,7 @@ Deno.serve(async (req: Request) => {
       return createErrorResponse(500, `Gmail send failed: ${gmailResult.error?.message ?? "unknown error"}`);
     }
 
-    // Log to communication_log
-    await supabaseAdmin.from("communication_log").insert({
+    await logCommunication({
       contact_id: contact_id ?? null,
       project_id: project_id ?? null,
       channel: "email",

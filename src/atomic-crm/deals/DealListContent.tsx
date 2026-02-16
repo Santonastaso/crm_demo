@@ -2,19 +2,37 @@ import type { OnDragEndResponder } from "@hello-pangea/dnd";
 import { DragDropContext } from "@hello-pangea/dnd";
 import isEqual from "lodash/isEqual";
 import type { DataProvider } from "ra-core";
-import { useDataProvider, useListContext } from "ra-core";
-import { useEffect, useState } from "react";
+import { useDataProvider, useGetList, useListContext } from "ra-core";
+import { useEffect, useState, useMemo } from "react";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import type { Deal } from "../types";
+import type { Deal, ProjectPipeline } from "../types";
 import { DealColumn } from "./DealColumn";
 import type { DealsByStage } from "./stages";
 import { getDealsByStage } from "./stages";
 
 export const DealListContent = () => {
-  const { dealStages } = useConfigurationContext();
-  const { data: unorderedDeals, isPending, refetch } = useListContext<Deal>();
+  const { dealStages: defaultDealStages } = useConfigurationContext();
+  const { data: unorderedDeals, isPending, refetch, filterValues } = useListContext<Deal>();
   const dataProvider = useDataProvider();
+
+  const projectId = filterValues?.project_id;
+
+  const { data: pipelineData } = useGetList<ProjectPipeline>("project_pipelines", {
+    filter: projectId ? { project_id: projectId } : { id: -1 },
+    sort: { field: "stage_order", order: "ASC" },
+    pagination: { page: 1, perPage: 50 },
+  });
+
+  const dealStages = useMemo(() => {
+    if (projectId && pipelineData && pipelineData.length > 0) {
+      return pipelineData.map((p) => ({
+        value: p.stage_name,
+        label: p.stage_name.charAt(0).toUpperCase() + p.stage_name.slice(1),
+      }));
+    }
+    return defaultDealStages;
+  }, [projectId, pipelineData, defaultDealStages]);
 
   const [dealsByStage, setDealsByStage] = useState<DealsByStage>(
     getDealsByStage([], dealStages),

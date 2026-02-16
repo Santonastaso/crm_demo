@@ -11,9 +11,8 @@ import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
 import { CommunicationTimeline } from "./CommunicationTimeline";
-import { ContactEmailCompose } from "./ContactEmailCompose";
+import { ContactCompose } from "./ContactCompose";
 import { ContactBookAppointment } from "./ContactBookAppointment";
-import { ContactMessageCompose } from "./ContactMessageCompose";
 
 export const ContactShow = () => (
   <ShowBase>
@@ -52,9 +51,9 @@ const ContactShowContent = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <ContactEmailCompose contact={record} />
-                <ContactMessageCompose contact={record} channel="whatsapp" />
-                <ContactMessageCompose contact={record} channel="sms" />
+                <ContactCompose contact={record} channel="email" />
+                <ContactCompose contact={record} channel="whatsapp" />
+                <ContactCompose contact={record} channel="sms" />
                 <ContactBookAppointment contact={record} />
                 <ReferenceField
                   source="company_id"

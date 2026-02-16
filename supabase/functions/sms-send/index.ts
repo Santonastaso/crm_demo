@@ -1,15 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse } from "../_shared/utils.ts";
+import { logCommunication } from "../_shared/communicationLog.ts";
+import { requirePost } from "../_shared/requestHandler.ts";
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return createErrorResponse(405, "Method Not Allowed");
-  }
+  const earlyResponse = requirePost(req);
+  if (earlyResponse) return earlyResponse;
 
   const twilioSid = Deno.env.get("TWILIO_ACCOUNT_SID");
   const twilioAuth = Deno.env.get("TWILIO_AUTH_TOKEN");
@@ -52,9 +48,8 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // Log to communication_log
   if (contact_id) {
-    await supabaseAdmin.from("communication_log").insert({
+    await logCommunication({
       contact_id,
       project_id: project_id ?? null,
       channel: "sms",

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
+import { logCommunication } from "../_shared/communicationLog.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -44,13 +45,12 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  // Log inbound SMS to communication_log
-  await supabaseAdmin.from("communication_log").insert({
+  await logCommunication({
     contact_id: contactId,
     channel: "sms",
     direction: "inbound",
     content_summary: body.substring(0, 500),
-    external_id: messageSid,
+    external_id: messageSid ?? undefined,
     metadata: { from, twilio_sid: messageSid },
   });
 

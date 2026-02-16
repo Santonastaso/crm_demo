@@ -18,6 +18,7 @@ import {
   ReferenceArrayField,
   ReferenceField,
   ReferenceManyField,
+  TextField,
 } from "@/components/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,10 +133,10 @@ const DealShowContent = () => {
                     Budget
                   </span>
                   <span className="text-sm">
-                    {record.amount.toLocaleString("en-US", {
+                    {record.amount.toLocaleString("it-IT", {
                       notation: "compact",
                       style: "currency",
-                      currency: "USD",
+                      currency: "EUR",
                       currencyDisplay: "narrowSymbol",
                       minimumSignificantDigits: 3,
                     })}
@@ -159,6 +160,19 @@ const DealShowContent = () => {
                     {findDealLabel(dealStages, record.stage)}
                   </span>
                 </div>
+
+                {record.unit_id && (
+                  <div className="flex flex-col mr-10">
+                    <span className="text-xs text-muted-foreground tracking-wide">
+                      Unit
+                    </span>
+                    <ReferenceField source="unit_id" reference="property_units" link="show">
+                      <span className="text-sm font-mono">
+                        <TextField source="code" />
+                      </span>
+                    </ReferenceField>
+                  </div>
+                )}
               </div>
 
               {!!record.contact_ids?.length && (

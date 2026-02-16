@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { endOfYesterday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { CheckSquare, Clock, Tag, TrendingUp, Users } from "lucide-react";
+import { CheckSquare, Clock, Home, Tag, TrendingUp, Users } from "lucide-react";
 import { FilterLiveForm, useGetIdentity, useGetList } from "ra-core";
 
 import { ToggleFilterButton, SearchInput } from "@/components/admin";
@@ -103,6 +103,13 @@ export const ContactListFilter = () => {
               value={{ "tags@cs": `{${record.id}}` }}
             />
           ))}
+      </FilterCategory>
+
+      <FilterCategory icon={<Home />} label="Lead Type">
+        <ToggleFilterButton className="w-full justify-between" label="Investitore" value={{ lead_type: "investitore" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Prima Casa" value={{ lead_type: "prima_casa" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Upgrade" value={{ lead_type: "upgrade" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Secondo Immobile" value={{ lead_type: "secondo_immobile" }} />
       </FilterCategory>
 
       <FilterCategory icon={<CheckSquare />} label="Tasks">

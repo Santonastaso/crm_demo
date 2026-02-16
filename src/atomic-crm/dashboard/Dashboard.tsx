@@ -6,6 +6,10 @@ import { DealsChart } from "./DealsChart";
 import { HotContacts } from "./HotContacts";
 import { TasksList } from "./TasksList";
 import { Welcome } from "./Welcome";
+import { PortfolioOverview } from "./PortfolioOverview";
+import { PipelineValue } from "./PipelineValue";
+import { ConversionFunnel } from "./ConversionFunnel";
+import { TopProjects } from "./TopProjects";
 
 export const Dashboard = () => {
   const {
@@ -47,18 +51,24 @@ export const Dashboard = () => {
       <div className="md:col-span-3">
         <div className="flex flex-col gap-4">
           {import.meta.env.VITE_IS_DEMO === "true" ? <Welcome /> : null}
+          <PortfolioOverview />
+          <PipelineValue />
           <HotContacts />
         </div>
       </div>
       <div className="md:col-span-6">
         <div className="flex flex-col gap-6">
           {totalDeal ? <DealsChart /> : null}
+          <TopProjects />
           <DashboardActivityLog />
         </div>
       </div>
 
       <div className="md:col-span-3">
-        <TasksList />
+        <div className="flex flex-col gap-4">
+          <ConversionFunnel />
+          <TasksList />
+        </div>
       </div>
     </div>
   );

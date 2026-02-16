@@ -45,6 +45,13 @@ const DealInfoInputs = () => {
           helperText={false}
         />
       </ReferenceInput>
+      <ReferenceInput source="unit_id" reference="property_units">
+        <SelectInput
+          optionText="code"
+          label="Property Unit"
+          helperText={false}
+        />
+      </ReferenceInput>
     </div>
   );
 };
@@ -103,7 +110,7 @@ const DealMiscInputs = () => {
           id: stage.value,
           name: stage.label,
         }))}
-        defaultValue="opportunity"
+        defaultValue="qualifica"
         helperText={false}
         validate={required()}
       />

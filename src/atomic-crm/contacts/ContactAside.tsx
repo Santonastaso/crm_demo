@@ -93,6 +93,11 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
           })
           .filter(Boolean)}
       </AsideSection>
+      {record.lead_type && (
+        <AsideSection title="Lead Type">
+          <span className="text-sm font-medium capitalize">{record.lead_type.replace("_", " ")}</span>
+        </AsideSection>
+      )}
       <AsideSection title="Background info">
         <WithRecord<Contact>
           render={(record) =>
