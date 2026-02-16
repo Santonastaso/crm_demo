@@ -82,12 +82,10 @@ export const authProvider: AuthProvider = {
     const isInitialized = await getIsInitialized();
     if (!isInitialized) return false;
 
-    // Get the current user
     const sale = await getSaleFromCache();
     if (sale == null) return false;
 
-    // Compute access rights from the sale role
-    const role = sale.administrator ? "admin" : "user";
+    const role = sale.role ?? (sale.administrator ? "admin" : "agent");
     return canAccess(role, params);
   },
 };

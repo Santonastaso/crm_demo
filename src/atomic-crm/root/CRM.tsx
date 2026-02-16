@@ -16,10 +16,21 @@ import {
   dataProvider as defaultDataProvider,
 } from "../providers/supabase";
 import sales from "../sales";
+import projects from "../projects";
+import segments from "../segments";
+import templates from "../templates";
+import knowledge from "../knowledge";
+import conversations from "../conversations";
+import discovery from "../discovery";
+import campaigns from "../campaigns";
+import bookings from "../bookings";
+import { PublicChat } from "../chat/PublicChat";
 import { SettingsPage } from "../settings/SettingsPage";
+import { EmailSettingsPage } from "../settings/EmailSettingsPage";
 import { ActivityLogPage } from "../activity/ActivityLogPage";
 import { WorkflowPage } from "../workflows/WorkflowPage";
 import { RemindersPage } from "../reminders/RemindersPage";
+import { ProjectProvider } from "../projects/ProjectContext";
 import type { ConfigurationContextValue } from "./ConfigurationContext";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import {
@@ -145,6 +156,7 @@ export const CRM = ({
             path={ForgotPasswordPage.path}
             element={<ForgotPasswordPage />}
           />
+          <Route path={PublicChat.path} element={<PublicChat />} />
         </CustomRoutes>
 
         <CustomRoutes>
@@ -152,6 +164,7 @@ export const CRM = ({
           <Route path={ActivityLogPage.path} element={<ActivityLogPage />} />
           <Route path={WorkflowPage.path} element={<WorkflowPage />} />
           <Route path={RemindersPage.path} element={<RemindersPage />} />
+          <Route path={EmailSettingsPage.path} element={<EmailSettingsPage />} />
         </CustomRoutes>
         <Resource name="deals" {...deals} />
         <Resource name="contacts" {...contacts} />
@@ -163,6 +176,21 @@ export const CRM = ({
         <Resource name="tasks" />
         <Resource name="sales" {...sales} />
         <Resource name="tags" />
+        <Resource name="projects" {...projects} />
+        <Resource name="segments" {...segments} />
+        <Resource name="conversations" {...conversations} />
+        <Resource name="messages" />
+        <Resource name="knowledge_documents" {...knowledge} />
+        <Resource name="bookings" {...bookings} />
+        <Resource name="discovery_scans" {...discovery} />
+        <Resource name="discovery_prospects" />
+        <Resource name="campaigns" {...campaigns} />
+        <Resource name="campaign_steps" />
+        <Resource name="campaign_sends" />
+        <Resource name="templates" {...templates} />
+        <Resource name="communication_log" />
+        <Resource name="email_accounts" />
+        <Resource name="document_chunks" />
       </Admin>
     </ConfigurationProvider>
   );

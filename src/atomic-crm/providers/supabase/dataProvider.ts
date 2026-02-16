@@ -147,7 +147,7 @@ const dataProviderWithCustomMethods = {
     id: Identifier,
     data: Partial<Omit<SalesFormData, "password">>,
   ) {
-    const { email, first_name, last_name, administrator, avatar, disabled } =
+    const { email, first_name, last_name, role, administrator, avatar, disabled } =
       data;
 
     const { data: sale, error } = await supabase.functions.invoke<Sale>(
@@ -159,7 +159,7 @@ const dataProviderWithCustomMethods = {
           email,
           first_name,
           last_name,
-          administrator,
+          role: role ?? (administrator ? "admin" : "agent"),
           disabled,
           avatar,
         },
@@ -167,7 +167,7 @@ const dataProviderWithCustomMethods = {
     );
 
     if (!sale || error) {
-      console.error("salesCreate.error", error);
+      console.error("salesUpdate.error", error);
       throw new Error("Failed to update account manager");
     }
 
@@ -333,6 +333,69 @@ export const dataProvider = withLifecycleCallbacks(
         const workflowEngine = new WorkflowEngine(dataProviderWithCustomMethods, workflows);
         await workflowEngine.executeWorkflows(data, params.previousData);
         return data;
+      },
+    },
+    {
+      resource: "campaigns",
+      afterCreate: async (result) => {
+        const campaign = result.data;
+        if (campaign?.template_id) {
+          const { data: template } = await baseDataProvider.getOne("templates", {
+            id: campaign.template_id,
+          });
+          if (template) {
+            await baseDataProvider.create("campaign_steps", {
+              data: {
+                campaign_id: campaign.id,
+                step_order: 1,
+                channel: template.channel ?? campaign.channel,
+                template_content: {
+                  body: template.body ?? "",
+                  subject: template.subject ?? "",
+                },
+                delay_hours: 0,
+              },
+            });
+          }
+        }
+        return result;
+      },
+    },
+    {
+      resource: "knowledge_documents",
+      beforeCreate: async (params) => {
+        const file = params.data.file;
+        if (!file?.rawFile) {
+          return params;
+        }
+        const rawFile: File = file.rawFile;
+        const fileExt = rawFile.name.split(".").pop() ?? "txt";
+        const fileName = `${params.data.project_id ?? "general"}/${Date.now()}_${rawFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("knowledge")
+          .upload(fileName, rawFile);
+        if (uploadError) {
+          console.error("Knowledge upload error:", uploadError);
+          throw new Error("Failed to upload document to storage");
+        }
+        const { file: _removed, ...rest } = params.data;
+        return {
+          ...params,
+          data: {
+            ...rest,
+            file_path: fileName,
+            file_type: fileExt,
+          },
+        };
+      },
+      afterCreate: async (result) => {
+        if (result.data?.id) {
+          supabase.functions.invoke("process-document", {
+            method: "POST",
+            body: { document_id: result.data.id },
+          }).catch((err: unknown) => console.error("process-document invoke error:", err));
+        }
+        return result;
       },
     },
   ],

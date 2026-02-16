@@ -1,0 +1,103 @@
+Industrie Edili Holding – Arte di Abitare
+https://www.industrieedili.it/web/default.asp?language=ita
+https://www.artediabitare.it/
+CRM Engine
+The operational core of the platform
+The CRM Engine is the central module that manages contacts, pipelines, segmentation, and communications for all active real estate projects. It is not a generic CRM adapted for real estate. It is vertically built around real estate sales dynamics, where sales cycles are long, deal values are high, and personalization of the relationship with the prospect is critical.
+What it does
+• Unified Contact Profile: complete contact record, timeline of all cross-channel interactions (chat, email, WhatsApp, phone, visits), exchanged documents, predictive score, and assigned cluster.
+• Multi-Project Pipeline: each real estate project (WIMBY, future developments) has its own customizable pipeline. The sales team can view deal progress using drag and drop between stages.
+• Dynamic Segmentation: the system creates segments based on combined criteria such as source, budget, interest in suite type, funnel stage, language, and digital behavior. Segments update automatically.
+• Integrated Communication: email and WhatsApp messages are sent directly from the CRM with customizable templates, open and click tracking, response tracking, and automated multi-step sequences.
+• Multi-Level RBAC: four access levels (Admin, Manager, Agent, Read-Only) to manage the central team, the Arte di Abitare agencies, and individual agents with controlled visibility.
+Conversational AI Agent
+The Conversational Agent is the direct contact point between Edili Holding and potential buyers. It operates 24/7 on two main channels: the project website chat widget and WhatsApp Business. It answers prospect questions, provides information on floor plans, pricing, purchase methods, and returns, and books video calls with the sales representative.
+How it works
+The agent uses the Anthropic Claude language model integrated with a project-specific knowledge base through a RAG architecture (Retrieval-Augmented Generation). For each real estate project, the system indexes brochures, floor plans, price lists, FAQs, sales conditions, and tax regulations. When a prospect asks a question, the agent retrieves relevant information from the documents and generates an accurate, contextualized response consistent with official materials.
+Main features
+• Intelligent Response: understands questions in Italian, English, and German regarding pricing, floor plans, payment methods (full ownership or 1/20 shares), expected returns, taxation, and purchase process. Target accuracy: 95 percent on standard questions.
+• Video Call Booking: when the prospect is ready for further discussion, the agent accesses the sales representative’s calendar and proposes available time slots. The prospect receives confirmation with a video call link within 60 seconds.
+• Lead Capture: during the conversation, the agent progressively collects qualifying data such as name, email, phone number, estimated budget, and type of interest. It automatically saves the information in the CRM by creating or updating the contact.
+• Human Escalation: when the conversation exceeds the AI’s configured scope, such as specific legal requests, price negotiations, or sensitive situations, the agent transfers the conversation to a human operator with full chat context.
+• Native Multilingual: automatically detects the prospect’s language and responds in Italian, English, or German without losing context, essential for an international project such as WIMBY.
+Guardrails
+• Does not provide binding legal or tax advice
+• Does not close sales or sign preliminary agreements
+• Does not communicate unauthorized prices or conditions
+• Always escalates requests outside the configured scope
+Technical sheet
+AI Model
+Anthropic Claude Sonnet (primary) plus Claude Haiku (fast responses)
+Knowledge Base
+RAG with embeddings on Pinecone or pgvector, project-specific documents
+Channels
+Embeddable and brandable web widget plus WhatsApp Business API (Meta Cloud)
+Scheduling
+Self-hosted Cal.com or Calendly API, Google or Outlook Calendar sync
+Languages
+Italian, English, German (expandable)
+AI Tools
+search_knowledge_base, get_property_details, book_videocall, create_lead, escalate_to_human
+AI Discovery Agent
+The Discovery Agent addresses a specific real estate challenge: identifying potential buyers before they actively search for a property. When Edili Holding launches a new project in a given area, the agent automatically scans local businesses, industries, and professionals, enriches them with verified contact data, and assigns a purchase propensity score.
+How it works
+The agent receives a geographic area as input, defined by a radius from the project location, along with parameters such as target sectors, company size, and scoring criteria. It queries configured data sources in sequence: Google Maps API for local businesses, Business Registries for corporate data, LinkedIn for key contacts, and real estate databases for recent transactions. It builds an enriched profile for each identified prospect. A scoring model assigns a score from 1 to 100 based on propensity indicators such as sector, company size, location, growth trends, and previous real estate investments.
+Main features
+• Geographic Scanning: given a radius around the project, identifies companies, commercial activities, and professional offices. For WIMBY, this applies to both the Padua area and Zanzibar for potential local partners.
+• Data Enrichment: retrieves company name, industry classification, size in terms of revenue and employees, key contacts with roles, verified email, and phone number. Target: at least 80 percent of prospects with complete data.
+• Predictive Scoring: assigns a score from 1 to 100 with explanation of main factors. Example: “Score 78 out of 100 – Architecture firm with 15 employees, 2 million revenue, 3 premium residential projects in the last year, no relevant foreign investments detected.”
+• Weekly Report: every Monday the sales team receives a report with the top 20 prospects of the week, ranked by priority, with suggested action for each such as introductory email, phone call, or event invitation.
+• CRM Insertion: qualified prospects are automatically inserted into the CRM with the tag “Discovery,” score, and data source, ready to be assigned to an agent or included in a campaign.
+Technical sheet
+AI Model
+Claude Opus for complex analysis plus Claude Haiku for batch processing
+Data Sources
+Google Maps Platform, Business Registries API, LinkedIn, real estate databases
+Enrichment
+Apollo.io API for B2B contacts, Google Places for business details
+Scheduling
+Automated weekly execution plus manual on-demand trigger
+Output
+Email report or notification plus automatic CRM insertion
+AI Tools
+search_google_maps, query_business_registry, enrich_contact, score_prospect, add_to_crm
+AI Campaign Agent
+The Campaign Agent automates the generation and sending of personalized communications for clusters of contacts. It does not send the same email to everyone. It analyzes the target cluster profile, generates calibrated content based on segment characteristics such as language, interest, funnel stage, and interaction history, and iteratively optimizes based on response metrics.
+How it works
+The workflow is as follows:
+The Marketing Manager selects a target cluster from the CRM.
+The agent analyzes the cluster profiles and generates personalized content for the segment.
+The content is presented for approval.
+The message is sent via email and or WhatsApp with full tracking.
+The agent analyzes metrics such as open rate, clicks, and replies, and suggests optimizations for the next send.
+Main features
+• AI Content Generation: creates personalized emails, WhatsApp messages, and SMS per segment. Adapts tone, length, call to action, and attachments based on cluster profile such as investors, families, or young professionals.
+• Multi-Channel Sequences: configures automated sequences with conditional logic. If a lead opens the email but does not respond, they receive a WhatsApp after three days. If they do not open the email, they receive a reminder SMS. Up to five steps per sequence.
+• Automatic A and B Testing: for each campaign generates two variants such as subject line, body, and call to action. Distributes them to a sample. After 24 hours automatically selects the winning variant for the rest of the cluster.
+• Metrics Dashboard: real-time tracking of open rate, click rate, replies, bounces, and opt-outs for each campaign. Comparison between clusters and campaigns to identify the most responsive segments.
+• Next Action Suggestions: after each campaign the agent analyzes results and suggests who to call, who to move to a different cluster, and which leads are ready for an appointment.
+Technical sheet
+AI Model
+Claude Sonnet for content generation plus template engine for rendering
+Email
+SendGrid or Resend with high deliverability, template engine, advanced tracking
+WhatsApp
+Meta Cloud API with approved templates, broadcast, bidirectional webhooks
+SMS
+Twilio as fallback for contacts not reachable via email or WhatsApp
+Analytics
+Real-time dashboard with KPIs per campaign, cluster, and channel
+AI Tools
+get_cluster, generate_content, schedule_campaign, analyze_results, suggest_next_action
+The client manages the entire real estate value chain.
+Specifically, it handles:
+Acquiring land
+Constructing buildings regardless of their nature
+Selling the property or individual units within it
+From a commercial perspective, the objective is to develop a platform capable of managing all commercial leads, segmenting them through clustering and predictive classification techniques.
+A CRM platform is therefore required, integrated with email and messaging apps, as well as with the website, to capture and manage interactions that occur directly on the web.
+The CRM must include an agent capable of interacting with the customer, providing specific information, and booking video calls with the sales representative based on their calendar availability.
+Additionally, an agent is required to identify, at scale, potential leads who might be interested in the real estate product even before it is built. This would operate by activating the agent within a specific area and searching for industries or commercial activities in that area that may have early interest in the product, initiating exchanges of materials and information through the CRM-integrated agent.
+The CRM must also allow the sending of customized messages to contact lists, supported by background communication materials.
+This applies both to the agent that searches for potential leads in the area and to the cluster-based communication campaigns sent to leads manually inserted into the CRM.
+

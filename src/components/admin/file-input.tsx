@@ -29,6 +29,42 @@ import { FormError, FormField, FormLabel } from "@/components/admin/form";
 import { InputHelperText } from "@/components/admin/input-helper-text";
 import { Button } from "@/components/ui/button";
 
+const EXT_TO_MIME: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".txt": "text/plain",
+  ".md": "text/markdown",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".doc": "application/msword",
+  ".csv": "text/csv",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+};
+
+function normalizeAccept(
+  accept: DropzoneOptions["accept"],
+): DropzoneOptions["accept"] {
+  if (accept == null || typeof accept === "object") {
+    return accept;
+  }
+  const s = String(accept).trim();
+  if (s === "*" || s === "") {
+    return undefined;
+  }
+  const parts = s.split(",").map((p) => p.trim().toLowerCase());
+  const result: Record<string, string[]> = {};
+  for (const part of parts) {
+    const ext = part.startsWith(".") ? part : `.${part}`;
+    const mime = EXT_TO_MIME[ext] ?? "application/octet-stream";
+    if (!result[mime]) result[mime] = [];
+    if (!result[mime].includes(ext)) result[mime].push(ext);
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 export const FileInput = (props: FileInputProps) => {
   const {
     alwaysOn,
@@ -168,8 +204,10 @@ export const FileInput = (props: FileInputProps) => {
       ? (Children.only(children) as ReactElement)
       : undefined;
 
+  const normalizedAccept = normalizeAccept(accept);
+
   const { getRootProps, getInputProps } = useDropzone({
-    accept,
+    accept: normalizedAccept,
     maxSize,
     minSize,
     multiple,

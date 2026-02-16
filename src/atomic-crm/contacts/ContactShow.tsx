@@ -10,6 +10,10 @@ import { NoteCreate, NotesIterator } from "../notes";
 import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
+import { CommunicationTimeline } from "./CommunicationTimeline";
+import { ContactEmailCompose } from "./ContactEmailCompose";
+import { ContactBookAppointment } from "./ContactBookAppointment";
+import { ContactMessageCompose } from "./ContactMessageCompose";
 
 export const ContactShow = () => (
   <ShowBase>
@@ -47,7 +51,11 @@ const ContactShowContent = () => {
                   )}
                 </div>
               </div>
-              <div>
+              <div className="flex items-center gap-2">
+                <ContactEmailCompose contact={record} />
+                <ContactMessageCompose contact={record} channel="whatsapp" />
+                <ContactMessageCompose contact={record} channel="sms" />
+                <ContactBookAppointment contact={record} />
                 <ReferenceField
                   source="company_id"
                   reference="companies"
@@ -70,6 +78,9 @@ const ContactShowContent = () => {
             </ReferenceManyField>
           </CardContent>
         </Card>
+        <div className="mt-4">
+          <CommunicationTimeline />
+        </div>
       </div>
       <ContactAside />
     </div>

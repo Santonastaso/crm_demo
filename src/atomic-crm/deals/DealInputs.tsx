@@ -38,6 +38,13 @@ const DealInfoInputs = () => {
         helperText={false}
       />
       <TextInput source="description" multiline rows={3} helperText={false} />
+      <ReferenceInput source="project_id" reference="projects">
+        <SelectInput
+          optionText="name"
+          label="Project"
+          helperText={false}
+        />
+      </ReferenceInput>
     </div>
   );
 };

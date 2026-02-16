@@ -14,7 +14,9 @@
     "prettier:apply": "prettier --config ./.prettierrc.mjs --write --list-different \"**/*.{js,json,ts,tsx,css,md,html}\"",
     "prettier:check": "prettier --config ./.prettierrc.mjs --check \"**/*.{js,json,ts,tsx,css,md,html}\"",
     "ghpages:deploy": "node ./scripts/ghpages-deploy.mjs",
-    "supabase:remote:init": "node ./scripts/supabase-remote-init.mjs"
+    "supabase:remote:init": "node ./scripts/supabase-remote-init.mjs",
+    "test:e2e": "playwright test e2e/crm-flow.spec.ts",
+    "test:e2e:auth": "playwright test e2e/crm-flow.spec.ts"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -80,6 +82,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@types/faker": "^5.5.9",
     "@types/jsonexport": "^3.0.5",

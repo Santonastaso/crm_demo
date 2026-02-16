@@ -9,15 +9,20 @@ const Header = () => {
   const { data: identity } = useGetIdentity();
   const logout = useLogout();
 
-  // Navigation items for CRM
   const navigationItems = [
     { label: 'Dashboard', to: '/', isActive: true },
     { label: 'Contacts', to: '/contacts' },
     { label: 'Companies', to: '/companies' },
     { label: 'Deals', to: '/deals' },
-    { label: 'Activity', to: '/activity' },
-    { label: 'Workflows', to: '/workflows' },
-    { label: 'Reminders', to: '/reminders' },
+    { label: 'Projects', to: '/projects' },
+    { label: 'Segments', to: '/segments' },
+    { label: 'Templates', to: '/templates' },
+    { label: 'Campaigns', to: '/campaigns' },
+    { label: 'Discovery', to: '/discovery_scans' },
+    { label: 'Conversations', to: '/conversations' },
+    { label: 'Knowledge', to: '/knowledge_documents' },
+    { label: 'Bookings', to: '/bookings' },
+    { label: 'Email', to: '/settings/email' },
   ];
 
   return (

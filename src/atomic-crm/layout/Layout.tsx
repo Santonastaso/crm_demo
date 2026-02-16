@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import Header from "./Header";
+import { ChatWidget } from "../chat-widget/ChatWidget";
 
 export const Layout = ({ children }: { children: ReactNode }) => (
   <>
@@ -16,5 +17,6 @@ export const Layout = ({ children }: { children: ReactNode }) => (
       </ErrorBoundary>
     </main>
     <Notification />
+    <ChatWidget />
   </>
 );
