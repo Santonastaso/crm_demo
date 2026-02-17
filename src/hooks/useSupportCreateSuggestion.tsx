@@ -3,7 +3,6 @@ import type { ChangeEvent, ReactElement } from "react";
 import {
   createContext,
   isValidElement,
-  useContext,
   useRef,
   useState,
 } from "react";
@@ -167,21 +166,4 @@ interface CreateSuggestionContextValue<T = unknown> {
   onCancel: () => void;
 }
 
-/**
- * @deprecated Use `useCreateSuggestionContext` from "ra-core" when available.
- */
-export const useCreateSuggestionContext = () => {
-  const context = useContext(CreateSuggestionContext);
-  if (!context) {
-    throw new Error(
-      "useCreateSuggestionContext must be used inside a CreateSuggestionContext.Provider",
-    );
-  }
-  return context;
-};
-
-/**
- * @deprecated Use `OnCreateHandler` from "ra-core" when available.
- */
-
-export type OnCreateHandler = (filter?: string) => any | Promise<any>;
+type OnCreateHandler = (filter?: string) => any | Promise<any>;

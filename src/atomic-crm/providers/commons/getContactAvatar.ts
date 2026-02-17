@@ -63,7 +63,6 @@ export async function getContactAvatar(
       return faviconUrl;
     }
 
-    // TODO: Step 3: Try to get image from LinkedIn.
   }
 
   return null;

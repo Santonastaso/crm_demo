@@ -10,6 +10,7 @@ import { PortfolioOverview } from "./PortfolioOverview";
 import { PipelineValue } from "./PipelineValue";
 import { ConversionFunnel } from "./ConversionFunnel";
 import { TopProjects } from "./TopProjects";
+import { StallAlerts } from "./StallAlerts";
 
 export const Dashboard = () => {
   const {
@@ -66,6 +67,7 @@ export const Dashboard = () => {
 
       <div className="md:col-span-3">
         <div className="flex flex-col gap-4">
+          <StallAlerts />
           <ConversionFunnel />
           <TasksList />
         </div>

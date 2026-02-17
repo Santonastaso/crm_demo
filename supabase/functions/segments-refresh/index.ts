@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+import { fetchEntityOr404 } from "../_shared/fetchEntityOr404.ts";
 import { type SegmentCriterion, buildFilter } from "../_shared/segmentUtils.ts";
 
 Deno.serve(async (req: Request) => {
@@ -17,15 +18,9 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(400, "segment_id is required");
   }
 
-  const { data: segment, error: segmentError } = await supabaseAdmin
-    .from("segments")
-    .select("*")
-    .eq("id", segment_id)
-    .single();
-
-  if (!segment || segmentError) {
-    return createErrorResponse(404, "Segment not found");
-  }
+  const result = await fetchEntityOr404("segments", segment_id, "Segment");
+  if (result.response) return result.response;
+  const segment = result.data;
 
   const criteria: SegmentCriterion[] = segment.criteria ?? [];
 

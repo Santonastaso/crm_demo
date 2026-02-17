@@ -47,7 +47,7 @@ import {
   defaultTitle,
 } from "./defaultConfiguration";
 import { i18nProvider } from "./i18nProvider";
-import { StartPage } from "@/atomic-crm/login/StartPage.tsx";
+import { StartPage } from "@/atomic-crm/login/StartPage";
 
 export type CRMProps = {
   dataProvider?: DataProvider;
@@ -192,6 +192,7 @@ export const CRM = ({
         <Resource name="campaign_steps" />
         <Resource name="campaign_sends" />
         <Resource name="templates" {...templates} />
+        <Resource name="workflows" />
         <Resource name="communication_log" />
         <Resource name="email_accounts" />
         <Resource name="document_chunks" />

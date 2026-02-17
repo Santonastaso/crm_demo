@@ -4,6 +4,7 @@ import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared
 import { generateEmbedding } from "../_shared/embeddings.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+import { fetchEntityOr404 } from "../_shared/fetchEntityOr404.ts";
 import { extractText, getDocumentProxy } from "npm:unpdf";
 
 const CHUNK_SIZE = 1000;
@@ -34,16 +35,9 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(400, "document_id is required");
   }
 
-  // Fetch the document record
-  const { data: doc, error: docError } = await supabaseAdmin
-    .from("knowledge_documents")
-    .select("*")
-    .eq("id", document_id)
-    .single();
-
-  if (!doc || docError) {
-    return createErrorResponse(404, "Document not found");
-  }
+  const docResult = await fetchEntityOr404("knowledge_documents", document_id, "Document");
+  if (docResult.response) return docResult.response;
+  const doc = docResult.data;
 
   try {
     // Update status to processing

@@ -15,8 +15,8 @@ import type {
   DealNote,
 } from "../../types";
 
-// FIXME: Requires 5 large queries to get the latest activities.
-// Replace with a server-side view or a custom API endpoint.
+// Fetches latest activities by querying each entity type separately.
+// A server-side view would be more efficient but is not yet available.
 export async function getActivityLog(
   dataProvider: DataProvider,
   companyId?: Identifier,

@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import type { Workflow } from "./types";
+import { defaultDealStages } from "../root/defaultConfiguration";
 
 type WorkflowCreateDialogProps = {
   onCreateWorkflow: (
@@ -34,7 +35,7 @@ export const WorkflowCreateDialog = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    triggerStage: "won",
+    triggerStage: "rogito",
     taskType: "Thank you",
     taskText: "Send thank you message to customer",
     dueDateOffset: 1,
@@ -64,7 +65,7 @@ export const WorkflowCreateDialog = ({
     setFormData({
       name: "",
       description: "",
-      triggerStage: "won",
+      triggerStage: "rogito",
       taskType: "Thank you",
       taskText: "Send thank you message to customer",
       dueDateOffset: 1,
@@ -129,12 +130,11 @@ export const WorkflowCreateDialog = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="opportunity">Opportunity</SelectItem>
-                <SelectItem value="proposal-sent">Proposal Sent</SelectItem>
-                <SelectItem value="in-negociation">In Negotiation</SelectItem>
-                <SelectItem value="won">Won</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
-                <SelectItem value="delayed">Delayed</SelectItem>
+                {defaultDealStages.map((stage) => (
+                  <SelectItem key={stage.value} value={stage.value}>
+                    {stage.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

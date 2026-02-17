@@ -98,6 +98,7 @@ export const addNoteToContact = async ({
         first_seen: new Date(),
         last_seen: new Date(),
         tags: [],
+        source: "email_inbound",
       })
       .select();
     if (createContactError || !newContacts[0])

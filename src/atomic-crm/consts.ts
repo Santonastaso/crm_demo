@@ -1,4 +1,4 @@
-import type { Sale } from "./types";
+import type { Sale } from "./types/core";
 
 export const COMPANY_CREATED = "company.created" as const;
 export const CONTACT_CREATED = "contact.created" as const;

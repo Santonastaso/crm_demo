@@ -53,6 +53,7 @@ export async function findContactByPhone(phone: string): Promise<number | null> 
 export async function findOrCreateContactByPhone(
   phone: string,
   displayName = "Unknown User",
+  source = "whatsapp",
 ): Promise<number | null> {
   const existing = await findContactByPhone(phone);
   if (existing) return existing;
@@ -70,6 +71,7 @@ export async function findOrCreateContactByPhone(
       last_seen: new Date().toISOString(),
       has_newsletter: false,
       tags: [],
+      source,
     })
     .select("id")
     .single();

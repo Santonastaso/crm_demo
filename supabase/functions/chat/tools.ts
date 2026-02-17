@@ -117,6 +117,7 @@ export async function executeTool(
           phone_jsonb: input.phone
             ? [{ number: input.phone, type: "Work" }]
             : [],
+          source: "website_chat",
         })
         .select("id")
         .single();

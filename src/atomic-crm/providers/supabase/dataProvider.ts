@@ -1,30 +1,16 @@
 import { supabaseDataProvider } from "ra-supabase-core";
-
-import type {
-  CreateParams,
-  DataProvider,
-  GetListParams,
-  Identifier,
-  UpdateParams,
-} from "ra-core";
+import type { DataProvider, GetListParams, Identifier } from "ra-core";
 import { withLifecycleCallbacks } from "ra-core";
-import type {
-  Contact,
-  ContactNote,
-  Deal,
-  DealNote,
-  RAFile,
-  Sale,
-  SalesFormData,
-  SignUpData,
-} from "../../types";
+import type { Deal, Sale, SalesFormData, SignUpData } from "../../types";
 import { getActivityLog } from "../commons/activity";
-import { getCompanyAvatar } from "../commons/getCompanyAvatar";
-import { getContactAvatar } from "../commons/getContactAvatar";
 import { getIsInitialized } from "./authProvider";
 import { supabase } from "./supabase";
 import { WorkflowEngine } from "../../workflows/workflowEngine";
-import { workflowStore } from "../../workflows/workflowStore";
+import { fetchEnabledWorkflows } from "../../workflows/workflowStore";
+import { uploadToBucket } from "./uploadToBucket";
+import { applyFullTextSearch } from "./fullTextSearch";
+import { processCompanyLogo, processContactAvatar } from "./avatarProcessing";
+import { syncUnitStatuses } from "./dealUnitSync";
 
 if (import.meta.env.VITE_SUPABASE_URL === undefined) {
   throw new Error("Please set the VITE_SUPABASE_URL environment variable");
@@ -41,47 +27,6 @@ const baseDataProvider = supabaseDataProvider({
   primaryKeys: new Map([["segment_contacts", ["segment_id", "contact_id"]]]),
 });
 
-const processCompanyLogo = async (params: any) => {
-  let logo = params.data.logo;
-
-  if (typeof logo !== "object" || logo === null || !logo.src) {
-    logo = await getCompanyAvatar(params.data);
-  } else if (logo.rawFile instanceof File) {
-    await uploadToBucket(logo);
-  }
-
-  return {
-    ...params,
-    data: {
-      ...params.data,
-      logo,
-    },
-  };
-};
-
-async function processContactAvatar(
-  params: UpdateParams<Contact>,
-): Promise<UpdateParams<Contact>>;
-
-async function processContactAvatar(
-  params: CreateParams<Contact>,
-): Promise<CreateParams<Contact>>;
-
-async function processContactAvatar(
-  params: CreateParams<Contact> | UpdateParams<Contact>,
-): Promise<CreateParams<Contact> | UpdateParams<Contact>> {
-  const { data } = params;
-  if (data.avatar?.src || !data.email_jsonb || !data.email_jsonb.length) {
-    return params;
-  }
-  const avatarUrl = await getContactAvatar(data);
-
-  // Clone the data and modify the clone
-  const newData = { ...data, avatar: { src: avatarUrl || undefined } };
-
-  return { ...params, data: newData };
-}
-
 const dataProviderWithCustomMethods = {
   ...baseDataProvider,
   async getList(resource: string, params: GetListParams) {
@@ -91,7 +36,6 @@ const dataProviderWithCustomMethods = {
     if (resource === "contacts") {
       return baseDataProvider.getList("contacts_summary", params);
     }
-
     return baseDataProvider.getList(resource, params);
   },
   async getOne(resource: string, params: any) {
@@ -101,7 +45,6 @@ const dataProviderWithCustomMethods = {
     if (resource === "contacts") {
       return baseDataProvider.getOne("contacts_summary", params);
     }
-
     return baseDataProvider.getOne(resource, params);
   },
 
@@ -109,12 +52,7 @@ const dataProviderWithCustomMethods = {
     const response = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          first_name,
-          last_name,
-        },
-      },
+      options: { data: { first_name, last_name } },
     });
 
     if (!response.data?.user || response.error) {
@@ -122,83 +60,55 @@ const dataProviderWithCustomMethods = {
       throw new Error("Failed to create account");
     }
 
-    // Update the is initialized cache
     getIsInitialized._is_initialized_cache = true;
-
-    return {
-      id: response.data.user.id,
-      email,
-      password,
-    };
+    return { id: response.data.user.id, email, password };
   },
+
   async salesCreate(body: SalesFormData) {
     const { data, error } = await supabase.functions.invoke<Sale>("users", {
       method: "POST",
       body,
     });
-
     if (!data || error) {
       console.error("salesCreate.error", error);
       throw new Error("Failed to create account manager");
     }
-
     return data;
   },
-  async salesUpdate(
-    id: Identifier,
-    data: Partial<Omit<SalesFormData, "password">>,
-  ) {
-    const { email, first_name, last_name, role, administrator, avatar, disabled } =
-      data;
 
-    const { data: sale, error } = await supabase.functions.invoke<Sale>(
-      "users",
-      {
-        method: "PATCH",
-        body: {
-          sales_id: id,
-          email,
-          first_name,
-          last_name,
-          role: role ?? (administrator ? "admin" : "agent"),
-          disabled,
-          avatar,
-        },
-      },
-    );
-
+  async salesUpdate(id: Identifier, data: Partial<Omit<SalesFormData, "password">>) {
+    const { email, first_name, last_name, role, avatar, disabled } = data;
+    const { data: sale, error } = await supabase.functions.invoke<Sale>("users", {
+      method: "PATCH",
+      body: { sales_id: id, email, first_name, last_name, role, disabled, avatar },
+    });
     if (!sale || error) {
       console.error("salesUpdate.error", error);
       throw new Error("Failed to update account manager");
     }
-
     return data;
   },
-  async updatePassword(id: Identifier) {
-    const { data: passwordUpdated, error } =
-      await supabase.functions.invoke<boolean>("updatePassword", {
-        method: "PATCH",
-        body: {
-          sales_id: id,
-        },
-      });
 
+  async sendPasswordReset(id: Identifier) {
+    const { data: passwordUpdated, error } =
+      await supabase.functions.invoke<boolean>("send-password-reset", {
+        method: "PATCH",
+        body: { sales_id: id },
+      });
     if (!passwordUpdated || error) {
       console.error("passwordUpdate.error", error);
       throw new Error("Failed to update password");
     }
-
     return passwordUpdated;
   },
+
   async unarchiveDeal(deal: Deal) {
-    // get all deals where stage is the same as the deal to unarchive
     const { data: deals } = await baseDataProvider.getList<Deal>("deals", {
       filter: { stage: deal.stage },
       pagination: { page: 1, perPage: 1000 },
       sort: { field: "index", order: "ASC" },
     });
 
-    // set index for each deal starting from 1, if the deal to unarchive is found, set its index to the last one
     const updatedDeals = deals.map((d, index) => ({
       ...d,
       index: d.id === deal.id ? 0 : index + 1,
@@ -215,9 +125,11 @@ const dataProviderWithCustomMethods = {
       ),
     );
   },
+
   async getActivityLog(companyId?: Identifier) {
     return getActivityLog(baseDataProvider, companyId);
   },
+
   async isInitialized() {
     return getIsInitialized();
   },
@@ -228,9 +140,9 @@ export type CrmDataProvider = typeof dataProviderWithCustomMethods;
 export const dataProvider = withLifecycleCallbacks(
   dataProviderWithCustomMethods,
   [
-    {
-      resource: "contactNotes",
-      beforeSave: async (data: ContactNote, _, __) => {
+    ...["contactNotes", "dealNotes", "dealInteractions"].map((resource) => ({
+      resource,
+      beforeSave: async (data: any) => {
         if (data.attachments) {
           for (const fi of data.attachments) {
             await uploadToBucket(fi);
@@ -238,32 +150,10 @@ export const dataProvider = withLifecycleCallbacks(
         }
         return data;
       },
-    },
-    {
-      resource: "dealNotes",
-      beforeSave: async (data: DealNote, _, __) => {
-        if (data.attachments) {
-          for (const fi of data.attachments) {
-            await uploadToBucket(fi);
-          }
-        }
-        return data;
-      },
-    },
-    {
-      resource: "dealInteractions",
-      beforeSave: async (data: any, _, __) => {
-        if (data.attachments) {
-          for (const fi of data.attachments) {
-            await uploadToBucket(fi);
-          }
-        }
-        return data;
-      },
-    },
+    })),
     {
       resource: "sales",
-      beforeSave: async (data: Sale, _, __) => {
+      beforeSave: async (data: Sale) => {
         if (data.avatar) {
           await uploadToBucket(data.avatar);
         }
@@ -272,65 +162,45 @@ export const dataProvider = withLifecycleCallbacks(
     },
     {
       resource: "contacts",
-      beforeCreate: async (params) => {
-        return processContactAvatar(params);
-      },
-      beforeUpdate: async (params) => {
-        return processContactAvatar(params);
-      },
-      beforeGetList: async (params) => {
-        return applyFullTextSearch([
-          "first_name",
-          "last_name",
-          "company_name",
-          "title",
-          "email",
-          "phone",
-          "background",
-        ])(params);
-      },
+      beforeCreate: async (params) => processContactAvatar(params),
+      beforeUpdate: async (params) => processContactAvatar(params),
+      beforeGetList: async (params) =>
+        applyFullTextSearch([
+          "first_name", "last_name", "company_name", "title", "email", "phone", "background",
+        ])(params),
     },
     {
       resource: "companies",
-      beforeGetList: async (params) => {
-        return applyFullTextSearch([
-          "name",
-          "phone_number",
-          "website",
-          "zipcode",
-          "city",
-          "stateAbbr",
-        ])(params);
-      },
+      beforeGetList: async (params) =>
+        applyFullTextSearch(["name", "phone_number", "website", "zipcode", "city", "stateAbbr"])(params),
       beforeCreate: async (params) => {
         const createParams = await processCompanyLogo(params);
-
         return {
           ...createParams,
-          data: {
-            ...createParams.data,
-            created_at: new Date().toISOString(),
-          },
+          data: { ...createParams.data, created_at: new Date().toISOString() },
         };
       },
-      beforeUpdate: async (params) => {
-        return await processCompanyLogo(params);
-      },
+      beforeUpdate: async (params) => processCompanyLogo(params),
     },
     {
       resource: "contacts_summary",
-      beforeGetList: async (params) => {
-        return applyFullTextSearch(["first_name", "last_name"])(params);
-      },
+      beforeGetList: async (params) =>
+        applyFullTextSearch(["first_name", "last_name"])(params),
     },
     {
       resource: "deals",
-      beforeGetList: async (params) => {
-        return applyFullTextSearch(["name", "type", "description"])(params);
+      beforeGetList: async (params) =>
+        applyFullTextSearch(["name", "type", "description"])(params),
+      beforeUpdate: async (params) => {
+        const previousData = params.previousData as Deal | undefined;
+        if (previousData && params.data.stage !== previousData.stage) {
+          params.data.stage_entered_at = new Date().toISOString();
+        }
+        return params;
       },
       afterUpdate: async (data: Deal, params) => {
-        // Execute workflows when deal is updated
-        const workflows = workflowStore.getWorkflows();
+        await syncUnitStatuses(data, params.previousData as Deal | undefined, dataProviderWithCustomMethods);
+        const workflows = await fetchEnabledWorkflows();
         const workflowEngine = new WorkflowEngine(dataProviderWithCustomMethods, workflows);
         await workflowEngine.executeWorkflows(data, params.previousData);
         return data;
@@ -350,10 +220,7 @@ export const dataProvider = withLifecycleCallbacks(
                 campaign_id: campaign.id,
                 step_order: 1,
                 channel: template.channel ?? campaign.channel,
-                template_content: {
-                  body: template.body ?? "",
-                  subject: template.subject ?? "",
-                },
+                template_content: { body: template.body ?? "", subject: template.subject ?? "" },
                 delay_hours: 0,
               },
             });
@@ -366,111 +233,27 @@ export const dataProvider = withLifecycleCallbacks(
       resource: "knowledge_documents",
       beforeCreate: async (params) => {
         const file = params.data.file;
-        if (!file?.rawFile) {
-          return params;
-        }
+        if (!file?.rawFile) return params;
+
         const rawFile: File = file.rawFile;
         const fileExt = rawFile.name.split(".").pop() ?? "txt";
         const fileName = `${params.data.project_id ?? "general"}/${Date.now()}_${rawFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("knowledge")
-          .upload(fileName, rawFile);
+        const { error: uploadError } = await supabase.storage.from("knowledge").upload(fileName, rawFile);
         if (uploadError) {
           console.error("Knowledge upload error:", uploadError);
           throw new Error("Failed to upload document to storage");
         }
         const { file: _removed, ...rest } = params.data;
-        return {
-          ...params,
-          data: {
-            ...rest,
-            file_path: fileName,
-            file_type: fileExt,
-          },
-        };
+        return { ...params, data: { ...rest, file_path: fileName, file_type: fileExt } };
       },
       afterCreate: async (result) => {
         if (result.data?.id) {
-          supabase.functions.invoke("process-document", {
-            method: "POST",
-            body: { document_id: result.data.id },
-          }).catch((err: unknown) => console.error("process-document invoke error:", err));
+          supabase.functions
+            .invoke("process-document", { method: "POST", body: { document_id: result.data.id } })
+            .catch((err: unknown) => console.error("process-document invoke error:", err));
         }
         return result;
       },
     },
   ],
 );
-
-const applyFullTextSearch = (columns: string[]) => (params: GetListParams) => {
-  if (!params.filter?.q) {
-    return params;
-  }
-  const { q, ...filter } = params.filter;
-  return {
-    ...params,
-    filter: {
-      ...filter,
-      "@or": columns.reduce((acc, column) => {
-        if (column === "email")
-          return {
-            ...acc,
-            [`email_fts@ilike`]: q,
-          };
-        if (column === "phone")
-          return {
-            ...acc,
-            [`phone_fts@ilike`]: q,
-          };
-        else
-          return {
-            ...acc,
-            [`${column}@ilike`]: q,
-          };
-      }, {}),
-    },
-  };
-};
-
-const uploadToBucket = async (fi: RAFile) => {
-  if (!fi.src.startsWith("blob:") && !fi.src.startsWith("data:")) {
-    // Sign URL check if path exists in the bucket
-    if (fi.path) {
-      const { error } = await supabase.storage
-        .from("attachments")
-        .createSignedUrl(fi.path, 60);
-
-      if (!error) {
-        return;
-      }
-    }
-  }
-
-  const dataContent = fi.src
-    ? await fetch(fi.src).then((res) => res.blob())
-    : fi.rawFile;
-
-  const file = fi.rawFile;
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${Math.random()}.${fileExt}`;
-  const filePath = `${fileName}`;
-  const { error: uploadError } = await supabase.storage
-    .from("attachments")
-    .upload(filePath, dataContent);
-
-  if (uploadError) {
-    console.error("uploadError", uploadError);
-    throw new Error("Failed to upload attachment");
-  }
-
-  const { data } = supabase.storage.from("attachments").getPublicUrl(filePath);
-
-  fi.path = filePath;
-  fi.src = data.publicUrl;
-
-  // save MIME type
-  const mimeType = file.type;
-  fi.type = mimeType;
-
-  return fi;
-};

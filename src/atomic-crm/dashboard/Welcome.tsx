@@ -3,38 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export const Welcome = () => (
   <Card>
     <CardHeader className="px-4">
-      <CardTitle>Your CRM Starter Kit</CardTitle>
+      <CardTitle>Industrie Edili Holding CRM</CardTitle>
     </CardHeader>
     <CardContent className="px-4">
       <p className="text-sm mb-4">
+        Piattaforma integrata per la gestione commerciale di{" "}
         <a
-          href="https://marmelab.com/atomic-crm"
+          href="https://www.artediabitare.it/"
           className="underline hover:no-underline"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          Pinger Demo
-        </a>{" "}
-        is a template designed to help you quickly build your own CRM.
-      </p>
-      <p className="text-sm mb-4">
-        This demo runs on a mock API, so you can explore and modify the data. It
-        resets on reload. The full version uses Supabase for the backend.
-      </p>
-      <p className="text-sm">
-        Powered by{" "}
-        <a
-          href="https://marmelab.com/shadcn-admin-kit"
-          className="underline hover:no-underline"
-        >
-          shadcn-admin-kit
+          Arte di Abitare
         </a>
-        , Pinger Demo is fully open-source. You can find the code at{" "}
+        {" "}e tutti i progetti immobiliari di{" "}
         <a
-          href="https://github.com/marmelab/atomic-crm"
+          href="https://www.industrieedili.it/web/default.asp?language=ita"
           className="underline hover:no-underline"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          marmelab/atomic-crm
+          Industrie Edili Holding
         </a>
         .
+      </p>
+      <p className="text-sm mb-4">
+        Gestisci contatti, pipeline commerciali, campagne marketing e comunicazioni
+        con i lead da un unico punto di accesso. Il sistema include agenti AI per
+        conversazioni automatiche, discovery di prospect e generazione contenuti.
+      </p>
+      <p className="text-sm">
+        Utilizza il menu di navigazione per accedere a contatti, aziende, deal,
+        progetti, unità immobiliari, segmenti, campagne e molto altro.
       </p>
     </CardContent>
   </Card>

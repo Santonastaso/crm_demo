@@ -27,7 +27,7 @@ export const TopProjects = () => {
 
   const projectStats = projects.map((p) => {
     const pUnits = (units ?? []).filter((u) => u.project_id === p.id);
-    const soldCount = pUnits.filter((u) => u.status === "rogitato").length;
+    const soldCount = pUnits.filter((u) => u.status === "rogito").length;
     const pDeals = (deals ?? []).filter((d) => d.project_id === p.id);
     const pipelineValue = pDeals.reduce((sum, d) => sum + (d.amount || 0), 0);
     return { ...p, unitCount: pUnits.length, soldCount, dealCount: pDeals.length, pipelineValue };

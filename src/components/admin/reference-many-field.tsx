@@ -74,7 +74,7 @@ const ReferenceManyFieldView = <
       (total == null &&
         hasPreviousPage === false &&
         hasNextPage === false &&
-        // @ts-expect-error FIXME total may be undefined when using partial pagination but the ListControllerResult type is wrong about it
+        // @ts-expect-error total may be undefined with partial pagination (upstream type issue)
         data.length === 0 &&
         // the user didn't set any filters
         !Object.keys(filterValues).length)) &&

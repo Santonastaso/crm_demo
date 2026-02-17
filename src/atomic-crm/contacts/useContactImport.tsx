@@ -143,6 +143,7 @@ export function useContactImport() {
                 tags: tagList.map((tag) => tag.id),
                 sales_id: user?.identity?.id,
                 linkedin_url,
+                source: "import",
               },
             });
           },

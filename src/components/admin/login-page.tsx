@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/admin/text-input";
 import { Notification } from "@/components/admin/notification";
-import { useConfigurationContext } from "@/atomic-crm/root/ConfigurationContext.tsx";
+import { useConfigurationContext } from "@/atomic-crm/root/ConfigurationContext";
 
 export const LoginPage = (props: { redirectTo?: string }) => {
   const { darkModeLogo, title } = useConfigurationContext();

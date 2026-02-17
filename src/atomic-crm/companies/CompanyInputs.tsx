@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { required, useRecordContext } from "ra-core";
 import ImageEditorField from "../misc/ImageEditorField";
-import { isLinkedinUrl } from "../misc/isLinkedInUrl";
+import { isLinkedInUrl } from "../misc/isLinkedInUrl";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { saleOptionRenderer } from "../consts";
 import type { Company } from "../types";
@@ -78,7 +78,7 @@ const CompanyContactInputs = () => {
       <TextInput
         source="linkedin_url"
         helperText={false}
-        validate={isLinkedinUrl}
+        validate={isLinkedInUrl}
       />
       <TextInput source="phone_number" helperText={false} />
     </div>

@@ -1,39 +1,20 @@
-import { CreateBase, Form, useGetIdentity } from "ra-core";
-import { Card, CardContent } from "@/components/ui/card";
-import { CancelButton, SaveButton, FormToolbar } from "@/components/admin";
-
+import { useGetIdentity } from "ra-core";
+import { ResourceFormShell } from "../layout/ResourceFormShell";
 import { CompanyInputs } from "./CompanyInputs";
+import { companyTransform } from "./companyTransform";
 
 export const CompanyCreate = () => {
   const { identity } = useGetIdentity();
   return (
-    <CreateBase
+    <ResourceFormShell
+      mode="create"
       redirect="show"
-      transform={(values) => {
-        // add https:// before website if not present
-        if (values.website && !values.website.startsWith("http")) {
-          values.website = `https://${values.website}`;
-        }
-        return values;
-      }}
+      maxWidth="none"
+      saveLabel="Create Company"
+      defaultValues={{ sales_id: identity?.id }}
+      transform={companyTransform}
     >
-      <div className="mt-2 flex lg:mr-72">
-        <div className="flex-1">
-          <Form defaultValues={{ sales_id: identity?.id }}>
-            <Card>
-              <CardContent>
-                <CompanyInputs />
-                <FormToolbar>
-                  <div className="flex flex-row gap-2 justify-end">
-                    <CancelButton />
-                    <SaveButton label="Create Company" />
-                  </div>
-                </FormToolbar>
-              </CardContent>
-            </Card>
-          </Form>
-        </div>
-      </div>
-    </CreateBase>
+      <CompanyInputs />
+    </ResourceFormShell>
   );
 };

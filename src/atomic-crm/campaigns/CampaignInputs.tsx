@@ -34,9 +34,9 @@ export const CampaignInputs = () => (
     <ReferenceInput source="template_id" reference="templates">
       <SelectInput
         optionText="name"
-        label="Message Template"
+        label="Message Template (Step 1)"
         validate={required()}
-        helperText={false}
+        helperText="Used for the first step. Add more steps after creation."
       />
     </ReferenceInput>
     <SelectInput

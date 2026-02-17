@@ -3,45 +3,87 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { WorkflowIcon, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useGetIdentity } from "ra-core";
+import {
+  useGetList,
+  useCreate,
+  useUpdate,
+  useDelete,
+  useGetIdentity,
+  useNotify,
+  useRefresh,
+} from "ra-core";
 import type { Workflow } from "./types";
 import { WorkflowCreateDialog } from "./WorkflowCreateDialog";
-import { workflowStore } from "./workflowStore";
 
 export const WorkflowPage = () => {
   const { identity } = useGetIdentity();
-  const [workflows, setWorkflows] = useState<Workflow[]>(
-    workflowStore.getWorkflows(),
-  );
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const [create] = useCreate();
+  const [update] = useUpdate();
+  const [deleteOne] = useDelete();
 
-  useEffect(() => {
-    const unsubscribe = workflowStore.subscribe(setWorkflows);
-    return unsubscribe;
-  }, []);
+  const { data: workflows = [], isPending } = useGetList<Workflow>("workflows", {
+    pagination: { page: 1, perPage: 100 },
+    sort: { field: "created_at", order: "DESC" },
+  });
 
-  const toggleWorkflow = (id: string) => {
-    const workflow = workflows.find((w) => w.id === id);
-    if (workflow) {
-      workflowStore.updateWorkflow(id, { enabled: !workflow.enabled });
-    }
+  const toggleWorkflow = (workflow: Workflow) => {
+    update(
+      "workflows",
+      {
+        id: workflow.id,
+        data: { enabled: !workflow.enabled },
+        previousData: workflow,
+      },
+      {
+        onSuccess: () => {
+          refresh();
+        },
+      },
+    );
   };
 
-  const deleteWorkflow = (id: string) => {
-    workflowStore.deleteWorkflow(id);
+  const handleDelete = (workflow: Workflow) => {
+    deleteOne(
+      "workflows",
+      { id: workflow.id, previousData: workflow },
+      {
+        onSuccess: () => {
+          notify("Workflow deleted");
+          refresh();
+        },
+      },
+    );
   };
 
   const createWorkflow = (
     workflowData: Omit<Workflow, "id" | "created_at" | "sales_id">,
   ) => {
-    const newWorkflow: Workflow = {
-      ...workflowData,
-      id: Date.now().toString(), // Simple ID generation for MVP
-      created_at: new Date().toISOString(),
-      sales_id: identity?.id || 1,
-    };
-    workflowStore.addWorkflow(newWorkflow);
+    create(
+      "workflows",
+      {
+        data: {
+          ...workflowData,
+          sales_id: identity?.id,
+        },
+      },
+      {
+        onSuccess: () => {
+          notify("Workflow created");
+          refresh();
+        },
+      },
+    );
   };
+
+  if (isPending) {
+    return (
+      <div className="max-w-4xl mx-auto mt-8">
+        <div className="text-center text-muted-foreground py-8">Loading workflows...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-8">
@@ -71,12 +113,12 @@ export const WorkflowPage = () => {
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={workflow.enabled}
-                    onCheckedChange={() => toggleWorkflow(workflow.id)}
+                    onCheckedChange={() => toggleWorkflow(workflow)}
                   />
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => deleteWorkflow(workflow.id)}
+                    onClick={() => handleDelete(workflow)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -90,11 +132,11 @@ export const WorkflowPage = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium">When:</span> Deal stage changes
-                  to "{workflow.trigger.stage}"
+                  to &quot;{workflow.trigger.stage}&quot;
                 </div>
                 <div>
-                  <span className="font-medium">Then:</span> Create "
-                  {workflow.action.taskType}" task
+                  <span className="font-medium">Then:</span> Create &quot;
+                  {workflow.action.taskType}&quot; task
                 </div>
               </div>
             </CardContent>

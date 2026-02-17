@@ -12,15 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { ThemeSwitch } from '@/components/theme/ThemeSwitch';
-
-// UserMenu Context
-export type UserMenuContextValue = {
-  onClose: () => void;
-};
-
-export const UserMenuContext = React.createContext<UserMenuContextValue | undefined>(undefined);
-
-export const useUserMenu = () => React.useContext(UserMenuContext);
+import { UserMenuContext, useUserMenu } from '@/hooks/user-menu-context';
 
 // RefreshButton Component
 export const RefreshButton = ({ onRefresh, loading = false }: { onRefresh?: () => void; loading?: boolean }) => {

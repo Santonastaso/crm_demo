@@ -1,5 +1,5 @@
 import { useTimeout } from "ra-core";
-import { ListPlaceholder } from "./ListPlaceholder.tsx";
+import { ListPlaceholder } from "./ListPlaceholder";
 
 export const SimpleListLoading = (props: SimpleListLoadingProps) => {
   const {

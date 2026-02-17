@@ -1,3 +1,5 @@
+import type { Identifier, RaRecord } from "ra-core";
+
 export type WorkflowTrigger = {
   type: "deal_stage_changed";
   stage: string;
@@ -11,12 +13,11 @@ export type WorkflowAction = {
 };
 
 export type Workflow = {
-  id: string;
   name: string;
   description: string;
   trigger: WorkflowTrigger;
   action: WorkflowAction;
   enabled: boolean;
   created_at: string;
-  sales_id: number;
-};
+  sales_id: Identifier;
+} & Pick<RaRecord, "id">;

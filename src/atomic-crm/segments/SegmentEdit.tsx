@@ -6,7 +6,13 @@ import { stripCriteriaIds } from "./segmentTransform";
 export const SegmentEdit = () => {
   const onSuccess = useSegmentRefreshOnSuccess("saved");
   return (
-    <ResourceFormShell mode="edit" redirect={false} mutationOptions={{ onSuccess }} transform={stripCriteriaIds}>
+    <ResourceFormShell
+      mode="edit"
+      redirect={false}
+      mutationMode="pessimistic"
+      mutationOptions={{ onSuccess }}
+      transform={stripCriteriaIds}
+    >
       <SegmentInputs />
     </ResourceFormShell>
   );

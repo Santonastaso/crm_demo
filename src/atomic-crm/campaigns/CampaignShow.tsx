@@ -4,15 +4,21 @@ import {
   useGetList,
   useGetOne,
   useRedirect,
+  useCreate,
+  useDelete,
+  useNotify,
+  useRefresh,
 } from "ra-core";
 import { ReferenceField, TextField } from "@/components/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Pencil, FileText } from "lucide-react";
-import type { Campaign, CampaignSend, Template } from "../types";
+import { Play, Pencil, FileText, Plus } from "lucide-react";
+import type { Campaign, CampaignSend, CampaignStep, Template } from "../types";
 import { CampaignMetrics } from "./CampaignMetrics";
+import { CampaignStepDisplay, CampaignStepBuilder } from "./CampaignStepBuilder";
 import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
+import { useState } from "react";
 
 export const CampaignShow = () => (
   <ShowBase>
@@ -24,9 +30,20 @@ const CampaignShowContent = () => {
   const { record, isPending } = useShowContext<Campaign>();
   const redirect = useRedirect();
   const { invoke } = useInvokeFunction();
+  const [create] = useCreate();
+  const [deleteOne] = useDelete();
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const [showAddStep, setShowAddStep] = useState(false);
 
   const { data: sends = [] } = useGetList<CampaignSend>("campaign_sends", {
     pagination: { page: 1, perPage: 1000 },
+    filter: record?.id ? { campaign_id: record.id } : {},
+  }, { enabled: !!record?.id });
+
+  const { data: steps = [] } = useGetList<CampaignStep>("campaign_steps", {
+    pagination: { page: 1, perPage: 20 },
+    sort: { field: "step_order", order: "ASC" },
     filter: record?.id ? { campaign_id: record.id } : {},
   }, { enabled: !!record?.id });
 
@@ -38,6 +55,40 @@ const CampaignShowContent = () => {
       errorMessage: "Failed to start campaign send",
     });
   };
+
+  const handleAddSteps = (newSteps: Array<{
+    step_order: number;
+    channel: string;
+    template_content: { subject: string; body: string };
+    delay_hours: number;
+    condition: string;
+  }>) => {
+    const stepsToCreate = newSteps.filter((s) => s.template_content.body.trim());
+    if (stepsToCreate.length === 0) return;
+
+    const maxOrder = Math.max(0, ...steps.map((s) => s.step_order));
+
+    Promise.all(
+      stepsToCreate.map((s, i) =>
+        create("campaign_steps", {
+          data: {
+            campaign_id: record.id,
+            step_order: maxOrder + i + 1,
+            channel: s.channel,
+            template_content: s.template_content,
+            delay_hours: s.delay_hours,
+            condition: { type: s.condition },
+          },
+        }),
+      ),
+    ).then(() => {
+      notify("Steps added");
+      setShowAddStep(false);
+      refresh();
+    });
+  };
+
+  const canEdit = record.status === "draft" || record.status === "scheduled";
 
   return (
     <div className="mt-2 max-w-4xl mx-auto space-y-4">
@@ -61,7 +112,7 @@ const CampaignShowContent = () => {
             >
               {record.status}
             </Badge>
-            {(record.status === "draft" || record.status === "scheduled") && (
+            {canEdit && (
               <>
                 <Button
                   size="sm"
@@ -99,7 +150,40 @@ const CampaignShowContent = () => {
         </CardContent>
       </Card>
 
-      {record.template_id && <TemplatePreview templateId={record.template_id} />}
+      {steps.length > 0 && <CampaignStepDisplay steps={steps} />}
+
+      {canEdit && (
+        <div>
+          {showAddStep ? (
+            <div className="space-y-3">
+              <CampaignStepBuilder onStepsChange={handleAddSteps} />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAddStep(false)}
+                >
+                  Annulla
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowAddStep(true)}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Aggiungi Step alla Sequenza
+            </Button>
+          )}
+        </div>
+      )}
+
+      {record.template_id && steps.length === 0 && (
+        <TemplatePreview templateId={record.template_id} />
+      )}
 
       <CampaignMetrics sends={sends} />
     </div>

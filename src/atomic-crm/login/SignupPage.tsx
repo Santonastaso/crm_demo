@@ -35,7 +35,6 @@ export const SignupPage = () => {
         redirectTo: "/contacts",
       }).then(() => {
         notify("Initial user successfully created");
-        // FIXME: We should probably provide a hook for that in the ra-core package
         queryClient.invalidateQueries({
           queryKey: ["auth", "canAccess"],
         });

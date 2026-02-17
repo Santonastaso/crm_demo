@@ -45,9 +45,9 @@ const ENERGY_CLASS_CHOICES = [
 
 const STATUS_CHOICES = [
   { id: "disponibile", name: "Disponibile" },
-  { id: "opzionato", name: "Opzionato" },
+  { id: "proposta", name: "Proposta" },
   { id: "compromesso", name: "Compromesso" },
-  { id: "rogitato", name: "Rogitato" },
+  { id: "rogito", name: "Rogito" },
 ];
 
 export const PropertyUnitInputs = () => (

@@ -13,11 +13,11 @@ import {
   ArrayInput,
 } from "@/components/admin";
 import { SimpleFormIterator } from "@/components/admin";
-import { isLinkedinUrl } from "../misc/isLinkedInUrl";
+import { isLinkedInUrl } from "../misc/isLinkedInUrl";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { LEAD_TYPES, saleOptionRenderer } from "../consts";
 import { Avatar } from "./Avatar";
-import { AutocompleteCompanyInput } from "@/atomic-crm/companies/AutocompleteCompanyInput.tsx";
+import { AutocompleteCompanyInput } from "@/atomic-crm/companies/AutocompleteCompanyInput";
 
 export const ContactInputs = () => {
   const isMobile = useIsMobile();
@@ -169,7 +169,7 @@ const ContactPersonalInformationInputs = () => {
         source="linkedin_url"
         label="Linkedin URL"
         helperText={false}
-        validate={isLinkedinUrl}
+        validate={isLinkedInUrl}
       />
     </div>
   );

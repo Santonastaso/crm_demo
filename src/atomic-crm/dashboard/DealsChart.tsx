@@ -6,11 +6,12 @@ import { memo, useMemo } from "react";
 
 import type { Deal } from "../types";
 
-const multiplier = {
-  opportunity: 0.2,
-  "proposal-sent": 0.5,
-  "in-negociation": 0.8,
-  delayed: 0.3,
+const multiplier: Record<string, number> = {
+  qualifica: 0.1,
+  visita: 0.2,
+  proposta: 0.5,
+  trattativa: 0.8,
+  compromesso: 0.9,
 };
 
 const threeMonthsAgo = new Date(
@@ -50,20 +51,20 @@ export const DealsChart = memo(() => {
       return {
         date: format(month, "MMM"),
         won: dealsByMonth[month]
-          .filter((deal: Deal) => deal.stage === "won")
+          .filter((deal: Deal) => deal.stage === "rogito")
           .reduce((acc: number, deal: Deal) => {
             acc += deal.amount || 0;
             return acc;
           }, 0),
         pending: dealsByMonth[month]
-          .filter((deal: Deal) => !["won", "lost"].includes(deal.stage))
+          .filter((deal: Deal) => !["rogito", "perso"].includes(deal.stage))
           .reduce((acc: number, deal: Deal) => {
-            // @ts-expect-error - multiplier type issue
-            acc += (deal.amount || 0) * multiplier[deal.stage];
+            const mult = multiplier[deal.stage] ?? 0;
+            acc += (deal.amount || 0) * mult;
             return acc;
           }, 0),
         lost: dealsByMonth[month]
-          .filter((deal: Deal) => deal.stage === "lost")
+          .filter((deal: Deal) => deal.stage === "perso")
           .reduce((acc: number, deal: Deal) => {
             acc -= deal.amount || 0;
             return acc;
@@ -74,7 +75,7 @@ export const DealsChart = memo(() => {
     return amountByMonth;
   }, [data]);
 
-  if (isPending) return null; // FIXME return skeleton instead
+  if (isPending) return <div className="h-[350px] animate-pulse rounded-md bg-muted" />;
   if (!data || data.length === 0 || months.length === 0) return null;
   
   const range = months.reduce(
@@ -85,6 +86,9 @@ export const DealsChart = memo(() => {
     },
     { min: 0, max: 0 },
   );
+  if (range.min === 0 && range.max === 0) {
+    range.max = 1000;
+  }
   return (
     <div className="flex flex-col">
       <div className="flex items-center mb-4">

@@ -85,8 +85,7 @@ export const authProvider: AuthProvider = {
     const sale = await getSaleFromCache();
     if (sale == null) return false;
 
-    const role = sale.role ?? (sale.administrator ? "admin" : "agent");
-    return canAccess(role, params);
+    return canAccess(sale.role, params);
   },
 };
 
@@ -104,7 +103,7 @@ const getSaleFromCache = async () => {
 
   const { data: dataSale, error: errorSale } = await supabase
     .from("sales")
-    .select("id, first_name, last_name, avatar, administrator")
+    .select("id, first_name, last_name, avatar, role")
     .match({ user_id: dataSession?.session?.user.id })
     .single();
 

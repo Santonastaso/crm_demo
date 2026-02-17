@@ -4,7 +4,26 @@ import { Draggable } from "@hello-pangea/dnd";
 import { useRedirect } from "ra-core";
 import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { formatEURCompact } from "@/lib/formatPrice";
+import { differenceInDays } from "date-fns";
 import type { Deal } from "../types";
+
+const DaysInStage = ({ deal }: { deal: Deal }) => {
+  const enteredAt = deal.stage_entered_at ?? deal.created_at;
+  if (!enteredAt) return null;
+  const days = differenceInDays(new Date(), new Date(enteredAt));
+  if (days < 3) return null;
+  const color =
+    days >= 14
+      ? "text-red-600"
+      : days >= 7
+        ? "text-amber-600"
+        : "text-muted-foreground";
+  return (
+    <span className={`text-[10px] font-medium ${color}`}>
+      {days}g in stage
+    </span>
+  );
+};
 
 export const DealCard = ({ deal, index }: { deal: Deal; index: number }) => {
   if (!deal) return null;
@@ -58,12 +77,15 @@ export const DealCardContent = ({
           >
             <CompanyAvatar width={20} height={20} />
           </ReferenceField>
-          <div className="ml-3">
+          <div className="ml-3 flex-1">
             <p className="text-sm font-medium mb-2">{deal.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatEURCompact(deal.amount)}
-              {deal.category ? `, ${deal.category}` : ""}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                {formatEURCompact(deal.amount)}
+                {deal.category ? `, ${deal.category}` : ""}
+              </p>
+              <DaysInStage deal={deal} />
+            </div>
           </div>
         </CardContent>
       </Card>

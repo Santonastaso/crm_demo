@@ -4,6 +4,7 @@ import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { fetchJson } from "../_shared/fetchJson.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+import { fetchEntityOr404 } from "../_shared/fetchEntityOr404.ts";
 import { type ScoringCriteria, computeScore, adaptPlace } from "../_shared/discoveryUtils.ts";
 
 const PLACES_API_NEW = "https://places.googleapis.com/v1/places:searchNearby";
@@ -25,15 +26,9 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(400, "scan_id is required");
   }
 
-  const { data: scan, error: scanError } = await supabaseAdmin
-    .from("discovery_scans")
-    .select("*")
-    .eq("id", scan_id)
-    .single();
-
-  if (!scan || scanError) {
-    return createErrorResponse(404, "Scan not found");
-  }
+  const scanResult = await fetchEntityOr404("discovery_scans", scan_id, "Scan");
+  if (scanResult.response) return scanResult.response;
+  const scan = scanResult.data;
 
   // Update status to running
   await supabaseAdmin

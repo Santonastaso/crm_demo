@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { endOfYesterday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { CheckSquare, Clock, Home, Tag, TrendingUp, Users } from "lucide-react";
+import { CheckSquare, Clock, Globe, Home, Tag, TrendingUp, Users } from "lucide-react";
 import { FilterLiveForm, useGetIdentity, useGetList } from "ra-core";
 
 import { ToggleFilterButton, SearchInput } from "@/components/admin";
@@ -110,6 +110,16 @@ export const ContactListFilter = () => {
         <ToggleFilterButton className="w-full justify-between" label="Prima Casa" value={{ lead_type: "prima_casa" }} />
         <ToggleFilterButton className="w-full justify-between" label="Upgrade" value={{ lead_type: "upgrade" }} />
         <ToggleFilterButton className="w-full justify-between" label="Secondo Immobile" value={{ lead_type: "secondo_immobile" }} />
+      </FilterCategory>
+
+      <FilterCategory icon={<Globe />} label="Source">
+        <ToggleFilterButton className="w-full justify-between" label="Manuale" value={{ source: "manual" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Chat Sito" value={{ source: "website_chat" }} />
+        <ToggleFilterButton className="w-full justify-between" label="WhatsApp" value={{ source: "whatsapp" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Email" value={{ source: "email_inbound" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Discovery" value={{ source: "discovery" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Import CSV" value={{ source: "import" }} />
+        <ToggleFilterButton className="w-full justify-between" label="Campagna" value={{ source: "campaign" }} />
       </FilterCategory>
 
       <FilterCategory icon={<CheckSquare />} label="Tasks">

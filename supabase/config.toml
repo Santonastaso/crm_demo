@@ -92,11 +92,11 @@ double_confirm_changes = true
 enable_confirmations = false
 
 [auth.email.template.invite]
-subject = "You've been invited to Pinger Demo"
+subject = "You've been invited to Industrie Edili CRM"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.recovery]
-subject = "Reset your Pinger Demo Password"
+subject = "Reset your Industrie Edili CRM Password"
 content_path = "./supabase/templates/recovery.html"
 
 [auth.sms]
@@ -154,4 +154,19 @@ s3_access_key = "env(S3_ACCESS_KEY)"
 s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.postmark]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.sms-webhook]
+verify_jwt = false
+
+[functions.email-track]
+verify_jwt = false
+
+[functions.send-password-reset]
 verify_jwt = false

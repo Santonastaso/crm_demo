@@ -1,6 +1,6 @@
 const LINKEDIN_URL_REGEX = /^http(?:s)?:\/\/(?:www\.)?linkedin.com\//;
 
-export const isLinkedinUrl = (url: string) => {
+export const isLinkedInUrl = (url: string) => {
   if (!url) return;
   try {
     // Parse the URL to ensure it is valid

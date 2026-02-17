@@ -15,11 +15,22 @@ import {
   DateField,
   EmailField,
 } from "@/components/admin";
+import { Badge } from "@/components/ui/badge";
 import type { ReactNode } from "react";
 import { AsideSection } from "../misc/AsideSection";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { SaleName } from "../sales/SaleName";
-import type { Contact } from "../types";
+import type { Contact, ContactSource } from "../types";
+
+const SOURCE_LABELS: Record<ContactSource, string> = {
+  manual: "Manuale",
+  website_chat: "Chat Sito",
+  whatsapp: "WhatsApp",
+  email_inbound: "Email",
+  discovery: "Discovery",
+  import: "Import CSV",
+  campaign: "Campagna",
+};
 
 export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
   const { contactGender } = useConfigurationContext();
@@ -96,6 +107,13 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
       {record.lead_type && (
         <AsideSection title="Lead Type">
           <span className="text-sm font-medium capitalize">{record.lead_type.replace("_", " ")}</span>
+        </AsideSection>
+      )}
+      {record.source && (
+        <AsideSection title="Provenienza">
+          <Badge variant="outline" className="text-xs">
+            {SOURCE_LABELS[record.source] ?? record.source}
+          </Badge>
         </AsideSection>
       )}
       <AsideSection title="Background info">

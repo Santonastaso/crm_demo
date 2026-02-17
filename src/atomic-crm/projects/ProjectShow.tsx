@@ -5,12 +5,16 @@ import { EditButton } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Trash2, Plus, GripVertical } from "lucide-react";
 import { supabase } from "@/atomic-crm/providers/supabase/supabase";
 import type { Project, PropertyUnit, ProjectPipeline } from "../types";
 import { UNIT_STATUS_COLORS } from "../property-units/unitStatus";
 import { formatEUR } from "@/lib/formatPrice";
+
+const MapField = lazy(() =>
+  import("../misc/MapField").then((m) => ({ default: m.MapField })),
+);
 
 const ProjectUnits = ({ projectId }: { projectId: number }) => {
   const { data: units } = useGetList<PropertyUnit>("property_units", {
@@ -211,10 +215,14 @@ const ProjectShowContent = () => {
           )}
           {(record.location_lat != null && record.location_lng != null) && (
             <div>
-              <div className="text-sm font-medium text-muted-foreground">Coordinates</div>
-              <div className="text-sm">
-                {record.location_lat}, {record.location_lng}
-              </div>
+              <div className="text-sm font-medium text-muted-foreground mb-1">Mappa</div>
+              <Suspense fallback={<div className="h-[300px] bg-muted animate-pulse rounded-lg" />}>
+                <MapField
+                  center={[Number(record.location_lat), Number(record.location_lng)]}
+                  zoom={14}
+                  height="300px"
+                />
+              </Suspense>
             </div>
           )}
           <div>

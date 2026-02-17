@@ -103,6 +103,7 @@ export const DiscoveryProspectTable = ({
                 email_jsonb: [],
                 phone_jsonb: phoneEntries,
                 background: `Discovery Agent: ${prospect.score_explanation ?? ""}${prospect.website ? `\nWebsite: ${prospect.website}` : ""}`,
+                source: "discovery",
               },
             });
 
@@ -287,6 +288,7 @@ const ProspectRow = ({
           email_jsonb: [],
           phone_jsonb: phoneEntries,
           background: `Discovery Agent: ${prospect.score_explanation ?? ""}${prospect.website ? `\nWebsite: ${prospect.website}` : ""}`,
+          source: "discovery",
         },
       });
 

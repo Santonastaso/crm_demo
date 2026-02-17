@@ -1,4 +1,3 @@
-// FIXME: This should be exported from the ra-core package
 type CanAccessParams<
   RecordType extends Record<string, any> = Record<string, any>,
 > = {

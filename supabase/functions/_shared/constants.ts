@@ -1,4 +1,4 @@
-export const DEFAULT_EVENT_TYPE_ID = 4777077;
+export const DEFAULT_EVENT_TYPE_ID = parseInt(Deno.env.get("CALCOM_EVENT_TYPE_ID") ?? "4777077", 10);
 export const SLOTS_LOOKAHEAD_DAYS = 7;
 export const GMAIL_SYNC_BATCH_SIZE = 50;
 export const CLAUDE_MAX_TOKENS = 1024;

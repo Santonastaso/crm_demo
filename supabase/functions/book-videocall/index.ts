@@ -107,7 +107,7 @@ Deno.serve(async (req: Request) => {
   const bookingPayload = {
     eventTypeId: event_type_id ?? DEFAULT_EVENT_TYPE_ID,
     start: startTime,
-    language: "it",
+    language: Deno.env.get("CALCOM_LANGUAGE") ?? "it",
     responses: {
       name: contactName,
       email: contactEmail,
@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
       contact_id: String(contact_id ?? ""),
       conversation_id: String(conversation_id ?? ""),
     },
-    timeZone: "Europe/Rome",
+    timeZone: Deno.env.get("CALCOM_TIMEZONE") ?? "Europe/Rome",
   };
 
   const bookingResponse = await fetch(

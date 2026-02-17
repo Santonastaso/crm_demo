@@ -3,6 +3,7 @@ import { addNoteToContact } from "./addNoteToContact.ts";
 import { extractMailContactData } from "./extractMailContactData.ts";
 import { getExpectedAuthorization } from "./getExpectedAuthorization.ts";
 import { getNoteContent } from "./getNoteContent.ts";
+import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 
 const webhookUser = Deno.env.get("POSTMARK_WEBHOOK_USER");
 const webhookPassword = Deno.env.get("POSTMARK_WEBHOOK_PASSWORD");
@@ -33,23 +34,15 @@ Deno.serve(async (req) => {
 
   const { Email: salesEmail } = FromFull;
   if (!salesEmail) {
-    // Return a 403 to let Postmark know that it's no use to retry this request
-    // https://postmarkapp.com/developer/webhooks/inbound-webhook#errors-and-retries
-    return new Response(
-      `Could not extract sales email from FromFull: ${FromFull}`,
-      { status: 403 },
-    );
+    // 403 tells Postmark not to retry this request
+    return createErrorResponse(403, `Could not extract sales email from FromFull: ${FromFull}`);
   }
 
   const contacts = extractMailContactData(ToFull);
 
   for (const { firstName, lastName, email, domain } of contacts) {
     if (!email) {
-      // Return a 403 to let Postmark know that it's no use to retry this request
-      // https://postmarkapp.com/developer/webhooks/inbound-webhook#errors-and-retries
-      return new Response(`Could not extract email from ToFull: ${ToFull}`, {
-        status: 403,
-      });
+      return createErrorResponse(403, `Could not extract email from ToFull: ${ToFull}`);
     }
 
     await addNoteToContact({
@@ -62,54 +55,41 @@ Deno.serve(async (req) => {
     });
   }
 
-  return new Response("OK");
+  return createJsonResponse({ status: "ok" });
 });
 
 const checkRequestTypeAndHeaders = (req: Request) => {
-  // Only allow known IP addresses
-  // We can use the x-forwarded-for header as it is populated by Supabase
-  // https://supabase.com/docs/guides/api/securing-your-api#accessing-request-information
   const forwardedFor = req.headers.get("x-forwarded-for");
   if (!forwardedFor) {
-    return new Response("Unauthorized", { status: 401 });
+    return createErrorResponse(401, "Unauthorized");
   }
   const ips = forwardedFor.split(",").map((ip) => ip.trim());
   const authorizedIPs = rawAuthorizedIPs.split(",").map((ip) => ip.trim());
   if (!ips.some((ip) => authorizedIPs.includes(ip))) {
-    return new Response("Unauthorized", { status: 401 });
+    return createErrorResponse(401, "Unauthorized");
   }
 
-  // Only allow POST requests
   if (req.method !== "POST") {
-    return new Response(null, { status: 405 });
+    return createErrorResponse(405, "Method Not Allowed");
   }
 
-  // Check the Authorization header
-  const expectedAuthorization = getExpectedAuthorization(
-    webhookUser,
-    webhookPassword,
-  );
+  const expectedAuthorization = getExpectedAuthorization(webhookUser, webhookPassword);
   const authorization = req.headers.get("Authorization");
   if (authorization !== expectedAuthorization) {
-    return new Response("Unauthorized", { status: 401 });
+    return createErrorResponse(401, "Unauthorized");
   }
 };
 
 // deno-lint-ignore no-explicit-any
 const checkBody = (json: any) => {
   const { ToFull, FromFull, Subject, TextBody } = json;
-
-  // In case of incorrect request data, we
-  // return a 403 to let Postmark know that it's no use to retry this request
-  // https://postmarkapp.com/developer/webhooks/inbound-webhook#errors-and-retries
+  // 403 tells Postmark not to retry
   if (!ToFull || !ToFull.length)
-    return new Response("Missing parameter: ToFull", { status: 403 });
+    return createErrorResponse(403, "Missing parameter: ToFull");
   if (!FromFull)
-    return new Response("Missing parameter: FromFull", { status: 403 });
+    return createErrorResponse(403, "Missing parameter: FromFull");
   if (!Subject)
-    return new Response("Missing parameter: Subject", { status: 403 });
+    return createErrorResponse(403, "Missing parameter: Subject");
   if (!TextBody)
-    return new Response("Missing parameter: TextBody", {
-      status: 403,
-    });
+    return createErrorResponse(403, "Missing parameter: TextBody");
 };

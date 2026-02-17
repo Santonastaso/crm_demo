@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
       type: "template",
       template: {
         name: template_name,
-        language: { code: "it" },
+        language: { code: Deno.env.get("WHATSAPP_TEMPLATE_LANG") ?? "it" },
         components: template_params
           ? [
               {

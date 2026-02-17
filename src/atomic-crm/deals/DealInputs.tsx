@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { required } from "ra-core";
 import { contactOptionText } from "../misc/ContactOption";
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import { AutocompleteCompanyInput } from "@/atomic-crm/companies/AutocompleteCompanyInput.tsx";
+import { AutocompleteCompanyInput } from "@/atomic-crm/companies/AutocompleteCompanyInput";
 
 export const DealInputs = () => {
   const isMobile = useIsMobile();

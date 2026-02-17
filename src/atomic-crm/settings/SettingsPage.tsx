@@ -81,13 +81,13 @@ const SettingsForm = ({
   const { isDirty } = useFormState();
   const dataProvider = useDataProvider<CrmDataProvider>();
 
-  const { mutate: updatePassword } = useMutation({
-    mutationKey: ["updatePassword"],
+  const { mutate: sendPasswordReset } = useMutation({
+    mutationKey: ["sendPasswordReset"],
     mutationFn: async () => {
       if (!identity) {
         throw new Error("Record not found");
       }
-      return dataProvider.updatePassword(identity.id);
+      return dataProvider.sendPasswordReset(identity.id);
     },
     onSuccess: () => {
       notify("A reset password email has been sent to your email address");
@@ -118,7 +118,7 @@ const SettingsForm = ({
   if (!identity) return null;
 
   const handleClickOpenPasswordChange = () => {
-    updatePassword();
+    sendPasswordReset();
   };
 
   const handleAvatarUpdate = async (values: any) => {

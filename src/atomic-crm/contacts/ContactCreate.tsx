@@ -1,34 +1,25 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { CreateBase, Form, useGetIdentity } from "ra-core";
-
-import { FormToolbar } from "@/components/admin";
+import { useGetIdentity } from "ra-core";
 import type { Contact } from "../types";
+import { ResourceFormShell } from "../layout/ResourceFormShell";
 import { ContactInputs } from "./ContactInputs";
 
 export const ContactCreate = () => {
   const { identity } = useGetIdentity();
   return (
-    <CreateBase
+    <ResourceFormShell
+      mode="create"
       redirect="show"
-      transform={(data: Contact) => ({
+      maxWidth="none"
+      defaultValues={{ sales_id: identity?.id }}
+      transform={(data: Record<string, unknown>) => ({
         ...data,
         first_seen: new Date().toISOString(),
         last_seen: new Date().toISOString(),
         tags: [],
-      })}
+        source: data.source ?? "manual",
+      } as Contact & Record<string, unknown>)}
     >
-      <div className="mt-2 flex lg:mr-72">
-        <div className="flex-1">
-          <Form defaultValues={{ sales_id: identity?.id }}>
-            <Card>
-              <CardContent>
-                <ContactInputs />
-                <FormToolbar />
-              </CardContent>
-            </Card>
-          </Form>
-        </div>
-      </div>
-    </CreateBase>
+      <ContactInputs />
+    </ResourceFormShell>
   );
 };

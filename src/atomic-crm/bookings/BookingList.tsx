@@ -46,7 +46,7 @@ export const BookingList = () => (
       </TopToolbar>
     }
   >
-    <DataTable>
+    <DataTable rowClick="show">
       <DataTable.Col source="contact_id" label="Contact">
         <ReferenceField source="contact_id" reference="contacts" link="show">
           <TextField source="first_name" />

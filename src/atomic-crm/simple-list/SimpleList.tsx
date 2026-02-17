@@ -10,14 +10,14 @@ import {
 } from "ra-core";
 import { isValidElement, type ReactElement } from "react";
 
-import { ListNoResults } from "./ListNoResults.tsx";
-import type { FunctionToElement } from "./SimpleListItem.tsx";
+import { ListNoResults } from "./ListNoResults";
+import type { FunctionToElement } from "./SimpleListItem";
 import {
   type SimpleListBaseProps,
   SimpleListItem,
   type SimpleListItemProps,
-} from "./SimpleListItem.tsx";
-import { SimpleListLoading } from "./SimpleListLoading.tsx";
+} from "./SimpleListItem";
+import { SimpleListLoading } from "./SimpleListLoading";
 
 /**
  * The <SimpleList> component renders a list of records

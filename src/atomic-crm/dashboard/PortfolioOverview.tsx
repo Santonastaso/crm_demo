@@ -25,7 +25,7 @@ export const PortfolioOverview = () => {
   );
 
   const disponibili = byStatus["disponibile"] || 0;
-  const venduti = byStatus["rogitato"] || 0;
+  const venduti = byStatus["rogito"] || 0;
 
   return (
     <Card>
