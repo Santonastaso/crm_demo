@@ -1,12 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
-import { findContactByPhone } from "../_shared/contactUtils.ts";
+import { findOrCreateContactByPhone } from "../_shared/contactUtils.ts";
+import { findOrCreateConversation } from "../_shared/conversationUtils.ts";
 
 Deno.serve(async (req: Request) => {
-  // WhatsApp webhook verification (GET)
   if (req.method === "GET") {
     const url = new URL(req.url);
     const mode = url.searchParams.get("hub.mode");
@@ -26,75 +25,29 @@ Deno.serve(async (req: Request) => {
 
   const body = await req.json();
 
-  // Process WhatsApp webhook payload
-  const entries = body.entry ?? [];
-  for (const entry of entries) {
-    const changes = entry.changes ?? [];
-    for (const change of changes) {
+  for (const entry of body.entry ?? []) {
+    for (const change of entry.changes ?? []) {
       if (change.field !== "messages") continue;
 
       const value = change.value;
-      const messages = value.messages ?? [];
 
-      for (const msg of messages) {
+      for (const msg of value.messages ?? []) {
         if (msg.type !== "text") continue;
 
         const fromPhone = msg.from;
         const messageText = msg.text?.body;
-
         if (!messageText) continue;
 
-        // Find or create contact by phone number
-        let contactId = await findContactByPhone(fromPhone);
-
-        if (!contactId) {
-          const profileName = value.contacts?.[0]?.profile?.name ?? "WhatsApp User";
-          const nameParts = profileName.split(" ");
-          const { data: newContact } = await supabaseAdmin
-            .from("contacts")
-            .insert({
-              first_name: nameParts[0] ?? "Unknown",
-              last_name: nameParts.slice(1).join(" ") || "",
-              phone_jsonb: [{ number: fromPhone, type: "Work" }],
-              email_jsonb: [],
-              status: "cold",
-              first_seen: new Date().toISOString(),
-              last_seen: new Date().toISOString(),
-              has_newsletter: false,
-              tags: [],
-            })
-            .select("id")
-            .single();
-          contactId = newContact?.id ?? null;
-        }
-
-        // Find or create conversation
-        let conversationId: number | null = null;
-        if (contactId) {
-          const { data: existingConv } = await supabaseAdmin
-            .from("conversations")
-            .select("id")
-            .eq("contact_id", contactId)
-            .eq("channel", "whatsapp")
-            .in("status", ["active", "escalated"])
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-          conversationId = existingConv?.[0]?.id ?? null;
-        }
-
-        if (!conversationId) {
-          const { data: newConv } = await supabaseAdmin
-            .from("conversations")
-            .insert({
-              contact_id: contactId,
-              channel: "whatsapp",
-              status: "active",
-            })
-            .select("id")
-            .single();
-          conversationId = newConv?.id ?? null;
-        }
+        const profileName =
+          value.contacts?.[0]?.profile?.name ?? "WhatsApp User";
+        const contactId = await findOrCreateContactByPhone(
+          fromPhone,
+          profileName,
+        );
+        const conversationId = await findOrCreateConversation(
+          contactId,
+          "whatsapp",
+        );
 
         try {
           const chatResponse = await invokeEdgeFunction("chat", {

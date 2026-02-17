@@ -2,101 +2,16 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
-
-interface SegmentCriterion {
-  field: string;
-  operator: string;
-  value: string | number | boolean | string[];
-}
-
-const ARRAY_COLUMNS = new Set(["tags"]);
-
-function parseIds(value: string | number | boolean | string[]): number[] {
-  if (Array.isArray(value)) return value.map(Number).filter((n) => !isNaN(n));
-  const str = String(value);
-  return str
-    .split(",")
-    .map((s) => Number(s.trim()))
-    .filter((n) => !isNaN(n));
-}
-
-function buildFilter(
-  query: any,
-  criteria: SegmentCriterion[],
-) {
-  let q = query;
-  for (const rule of criteria) {
-    // Array columns (e.g. tags bigint[]) need special PostgREST operators
-    if (ARRAY_COLUMNS.has(rule.field)) {
-      const ids = parseIds(rule.value);
-      if (ids.length === 0) continue;
-      switch (rule.operator) {
-        case "eq":
-        case "contains":
-          // "has all of these tags" → @> (contains)
-          q = q.contains(rule.field, ids);
-          break;
-        case "in":
-          // "has any of these tags" → && (overlaps)
-          q = q.overlaps(rule.field, ids);
-          break;
-        case "neq":
-        case "not_in":
-          // "does not have any of these tags"
-          q = q.not(rule.field, "ov", `{${ids.join(",")}}`);
-          break;
-        default:
-          break;
-      }
-      continue;
-    }
-
-    switch (rule.operator) {
-      case "eq":
-        q = q.eq(rule.field, rule.value);
-        break;
-      case "neq":
-        q = q.neq(rule.field, rule.value);
-        break;
-      case "gt":
-        q = q.gt(rule.field, rule.value);
-        break;
-      case "lt":
-        q = q.lt(rule.field, rule.value);
-        break;
-      case "gte":
-        q = q.gte(rule.field, rule.value);
-        break;
-      case "lte":
-        q = q.lte(rule.field, rule.value);
-        break;
-      case "contains":
-        q = q.ilike(rule.field, `%${rule.value}%`);
-        break;
-      case "in":
-        q = q.in(
-          rule.field,
-          Array.isArray(rule.value) ? rule.value : [rule.value],
-        );
-        break;
-      case "not_in": {
-        const values = Array.isArray(rule.value) ? rule.value : [rule.value];
-        const quoted = values.map((v) =>
-          typeof v === "string" ? `"${v.replace(/"/g, '\\"')}"` : String(v),
-        );
-        q = q.not(rule.field, "in", `(${quoted.join(",")})`);
-        break;
-      }
-    }
-  }
-  return q;
-}
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+import { type SegmentCriterion, buildFilter } from "../_shared/segmentUtils.ts";
 
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
   if (earlyResponse) return earlyResponse;
 
-  const { segment_id } = await req.json();
+  const parsed = await parseJsonBody<{ segment_id?: number }>(req);
+  if (!parsed.ok) return parsed.response;
+  const { segment_id } = parsed.data;
 
   if (!segment_id) {
     return createErrorResponse(400, "segment_id is required");

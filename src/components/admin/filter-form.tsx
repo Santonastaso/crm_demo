@@ -5,9 +5,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import get from "lodash/get";
-import isEqual from "lodash/isEqual";
-import queryString from "query-string";
+import get from "@/lib/get";
+import isEqual from "@/lib/isEqual";
 import {
   FieldTitle,
   FilterLiveForm,
@@ -362,18 +361,14 @@ export const FilterButton = (props: FilterButtonProps) => {
             ) : (
               <DropdownMenuItem
                 onClick={(): void => {
-                  navigate({
-                    search: queryString.stringify({
-                      filter: JSON.stringify(savedQuery.value.filter),
-                      sort: savedQuery.value.sort?.field,
-                      order: savedQuery.value.sort?.order,
-                      page: 1,
-                      perPage: savedQuery.value.perPage,
-                      displayedFilters: JSON.stringify(
-                        savedQuery.value.displayedFilters,
-                      ),
-                    }),
-                  });
+                  const params = new URLSearchParams();
+                  params.set("filter", JSON.stringify(savedQuery.value.filter));
+                  if (savedQuery.value.sort?.field) params.set("sort", savedQuery.value.sort.field);
+                  if (savedQuery.value.sort?.order) params.set("order", savedQuery.value.sort.order);
+                  params.set("page", "1");
+                  if (savedQuery.value.perPage) params.set("perPage", String(savedQuery.value.perPage));
+                  params.set("displayedFilters", JSON.stringify(savedQuery.value.displayedFilters));
+                  navigate({ search: params.toString() });
                   setOpen(false);
                 }}
                 key={index}

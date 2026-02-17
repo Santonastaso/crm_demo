@@ -3,102 +3,17 @@ import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { invokeEdgeFunction } from "../_shared/invokeFunction.ts";
-import { primaryEmail, primaryPhone } from "../_shared/contactUtils.ts";
-
-function renderTemplate(
-  template: string,
-  contact: Record<string, any>,
-): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    if (key === "first_name") return contact.first_name ?? "";
-    if (key === "last_name") return contact.last_name ?? "";
-    if (key === "email") {
-      return primaryEmail(contact) ?? "";
-    }
-    if (key === "phone") {
-      return primaryPhone(contact) ?? "";
-    }
-    return contact[key] ?? "";
-  });
-}
-
-async function sendViaChannel(
-  channel: string,
-  contact: Record<string, any>,
-  message: string,
-  subject: string | null,
-  campaignId: number,
-  projectId: number | null,
-  salesId: number | null,
-): Promise<{ status: string; external_id?: string; tracking_id?: string }> {
-  const contactId = contact.id;
-
-  if (channel === "whatsapp") {
-    const phone = primaryPhone(contact);
-    if (!phone) return { status: "failed" };
-
-    const response = await invokeEdgeFunction("whatsapp-send", {
-      to: phone,
-      message,
-      contact_id: contactId,
-      project_id: projectId,
-    });
-
-    const result = await response.json();
-    return response.ok
-      ? { status: "sent", external_id: result.wa_message_id }
-      : { status: "failed" };
-  }
-
-  if (channel === "sms") {
-    const phone = primaryPhone(contact);
-    if (!phone) return { status: "failed" };
-
-    const response = await invokeEdgeFunction("sms-send", {
-      to: phone,
-      message,
-      contact_id: contactId,
-      project_id: projectId,
-    });
-
-    const result = await response.json();
-    return response.ok
-      ? { status: "sent", external_id: result.sms_sid }
-      : { status: "failed" };
-  }
-
-  if (channel === "email") {
-    const email = primaryEmail(contact);
-    if (!email) return { status: "failed" };
-
-    // Generate tracking_id upfront for open/click tracking
-    const trackingId = crypto.randomUUID();
-
-    const response = await invokeEdgeFunction("gmail-send", {
-      to: email,
-      subject: subject ?? "No subject",
-      body_html: `<div>${message.replace(/\n/g, "<br>")}</div>`,
-      contact_id: contactId,
-      project_id: projectId,
-      sales_id: salesId,
-      tracking_id: trackingId,
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return { status: "sent", external_id: result.message_id, tracking_id: trackingId };
-    }
-    return { status: "failed" };
-  }
-
-  return { status: "failed" };
-}
+import { renderTemplate } from "../_shared/templateUtils.ts";
+import { sendViaChannel } from "./channels.ts";
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
 
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
   if (earlyResponse) return earlyResponse;
 
-  const { campaign_id } = await req.json();
+  const parsed = await parseJsonBody<{ campaign_id?: number }>(req);
+  if (!parsed.ok) return parsed.response;
+  const { campaign_id } = parsed.data;
 
   if (!campaign_id) {
     return createErrorResponse(400, "campaign_id is required");

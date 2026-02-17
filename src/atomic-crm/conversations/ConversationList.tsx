@@ -6,27 +6,12 @@ import {
 } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
 import { useRecordContext } from "ra-core";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge, type StatusMap } from "@/atomic-crm/misc/StatusBadge";
 
-const StatusBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  const variants: Record<string, "default" | "destructive" | "secondary" | "outline"> = {
-    active: "default",
-    escalated: "destructive",
-    closed: "secondary",
-  };
-  return (
-    <Badge variant={variants[record.status] ?? "outline"}>
-      {record.status}
-    </Badge>
-  );
-};
-
-const ChannelBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  return <Badge variant="outline">{record.channel}</Badge>;
+const conversationStatusMap: StatusMap = {
+  active: "default",
+  escalated: "destructive",
+  closed: "secondary",
 };
 
 const ContactName = () => {
@@ -51,10 +36,10 @@ export const ConversationList = () => (
         <ContactName />
       </DataTable.Col>
       <DataTable.Col source="channel" label="Channel">
-        <ChannelBadge />
+        <StatusBadge source="channel" map={{}} />
       </DataTable.Col>
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={conversationStatusMap} />
       </DataTable.Col>
       <DataTable.Col source="updated_at" label="Last Activity" />
     </DataTable>

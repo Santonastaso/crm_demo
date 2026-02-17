@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, RefreshCw, Loader2, Trash2, Link as LinkIcon } from "lucide-react";
 import { useGetIdentity, useNotify, useGetList, useRefresh } from "ra-core";
 import { useState, useEffect } from "react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 import type { EmailAccount } from "../types";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -13,6 +13,7 @@ export const EmailSettingsPage = () => {
   const { data: identity } = useGetIdentity();
   const notify = useNotify();
   const refresh = useRefresh();
+  const { invoke } = useInvokeFunction();
   const [syncing, setSyncing] = useState(false);
   const [disconnecting, setDisconnecting] = useState<number | null>(null);
 
@@ -56,20 +57,17 @@ export const EmailSettingsPage = () => {
   const handleSync = async (accountSalesId?: number) => {
     setSyncing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("gmail-sync", {
-        method: "POST",
-        body: { sales_id: accountSalesId ?? salesId },
-      });
-      if (error) throw error;
+      const data = await invoke<{ results?: { synced: number }[] }>(
+        "gmail-sync",
+        { sales_id: accountSalesId ?? salesId },
+        { autoRefresh: true },
+      );
       const results = data?.results ?? [];
       const total = results.reduce(
-        (sum: number, r: { synced: number }) => sum + r.synced,
+        (sum: number, r) => sum + r.synced,
         0,
       );
       notify(`Synced ${total} email${total !== 1 ? "s" : ""}`);
-      refresh();
-    } catch {
-      notify("Email sync failed", { type: "error" });
     } finally {
       setSyncing(false);
     }
@@ -78,15 +76,10 @@ export const EmailSettingsPage = () => {
   const handleDisconnect = async (accountId: number) => {
     setDisconnecting(accountId);
     try {
-      const { error } = await supabase.functions.invoke("gmail-auth", {
-        method: "POST",
-        body: { action: "disconnect", email_account_id: accountId },
+      await invoke("gmail-auth", { action: "disconnect", email_account_id: accountId }, {
+        successMessage: "Gmail account disconnected",
+        errorMessage: "Failed to disconnect account",
       });
-      if (error) throw error;
-      notify("Gmail account disconnected");
-      refresh();
-    } catch {
-      notify("Failed to disconnect account", { type: "error" });
     } finally {
       setDisconnecting(null);
     }

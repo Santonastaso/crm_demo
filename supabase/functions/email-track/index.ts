@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
+import { createErrorResponse } from "../_shared/utils.ts";
 
 // 1x1 transparent GIF
 const TRACKING_PIXEL = Uint8Array.from(
@@ -16,7 +17,7 @@ Deno.serve(async (req: Request) => {
   const redirectUrl = url.searchParams.get("url");
 
   if (!trackingId || !type) {
-    return new Response("Missing parameters", { status: 400 });
+    return createErrorResponse(400, "Missing parameters");
   }
 
   const now = new Date().toISOString();
@@ -53,5 +54,5 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  return new Response("Unknown type", { status: 400 });
+  return createErrorResponse(400, "Unknown type");
 });

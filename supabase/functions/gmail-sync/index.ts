@@ -1,10 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
+import { GMAIL_SYNC_BATCH_SIZE } from "../_shared/constants.ts";
 import { getValidGmailToken } from "../_shared/gmailToken.ts";
 import { logCommunication } from "../_shared/communicationLog.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { findContactByEmail } from "../_shared/contactUtils.ts";
+import { getHeader, extractEmail, getBodyText } from "../_shared/gmailUtils.ts";
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
 
 const GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1/users/me";
 
@@ -25,43 +28,13 @@ interface GmailMessage {
   internalDate: string;
 }
 
-function getHeader(headers: Array<{ name: string; value: string }>, name: string): string {
-  return headers.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ?? "";
-}
-
-function extractEmail(headerValue: string): string {
-  const match = headerValue.match(/<([^>]+)>/);
-  return (match ? match[1] : headerValue).toLowerCase().trim();
-}
-
-function getBodyText(payload: GmailMessage["payload"]): string {
-  if (payload.body?.data) {
-    try {
-      return atob(payload.body.data.replace(/-/g, "+").replace(/_/g, "/"));
-    } catch {
-      return "";
-    }
-  }
-
-  if (payload.parts) {
-    const textPart = payload.parts.find((p) => p.mimeType === "text/plain");
-    if (textPart?.body?.data) {
-      try {
-        return atob(textPart.body.data.replace(/-/g, "+").replace(/_/g, "/"));
-      } catch {
-        return "";
-      }
-    }
-  }
-
-  return "";
-}
-
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
   if (earlyResponse) return earlyResponse;
 
-  const { sales_id } = await req.json();
+  const parsed = await parseJsonBody<{ sales_id?: number }>(req);
+  if (!parsed.ok) return parsed.response;
+  const { sales_id } = parsed.data;
 
   // Get all email accounts, or just one if sales_id provided
   let query = supabaseAdmin.from("email_accounts").select("*");
@@ -97,7 +70,7 @@ Deno.serve(async (req: Request) => {
       const afterEpoch = Math.floor(lastSync.getTime() / 1000);
       const q = `after:${afterEpoch}`;
 
-      const listUrl = `${GMAIL_API_BASE}/messages?q=${encodeURIComponent(q)}&maxResults=50`;
+      const listUrl = `${GMAIL_API_BASE}/messages?q=${encodeURIComponent(q)}&maxResults=${GMAIL_SYNC_BATCH_SIZE}`;
       const listRes = await fetch(listUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, MessageSquare, Phone, Send, Loader2, X } from "lucide-react";
 import { useState } from "react";
-import { useNotify, useRefresh, useGetIdentity } from "ra-core";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useNotify, useGetIdentity } from "ra-core";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 import type { Contact } from "../types";
 
 type Channel = "email" | "whatsapp" | "sms";
@@ -58,9 +58,8 @@ export const ContactCompose = ({ contact, channel }: ContactComposeProps) => {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [sending, setSending] = useState(false);
   const notify = useNotify();
-  const refresh = useRefresh();
+  const { invoke, loading: sending } = useInvokeFunction();
   const { data: identity } = useGetIdentity();
 
   if (!recipient) return null;
@@ -71,40 +70,30 @@ export const ContactCompose = ({ contact, channel }: ContactComposeProps) => {
       return;
     }
 
-    setSending(true);
-    try {
-      const payload: Record<string, unknown> =
-        channel === "email"
-          ? {
-              to: recipient,
-              subject: subject.trim(),
-              body_html: `<div>${body.replace(/\n/g, "<br>")}</div>`,
-              body_text: body,
-              contact_id: contact.id,
-              sales_id: identity?.id,
-            }
-          : {
-              to: recipient,
-              message: body.trim(),
-              contact_id: contact.id,
-            };
+    const payload: Record<string, unknown> =
+      channel === "email"
+        ? {
+            to: recipient,
+            subject: subject.trim(),
+            body_html: `<div>${body.replace(/\n/g, "<br>")}</div>`,
+            body_text: body,
+            contact_id: contact.id,
+            sales_id: identity?.id,
+          }
+        : {
+            to: recipient,
+            message: body.trim(),
+            contact_id: contact.id,
+          };
 
-      const { error } = await supabase.functions.invoke(config.functionName, {
-        method: "POST",
-        body: payload,
-      });
-
-      if (error) throw error;
-
-      notify(`${config.label} sent to ${recipient}`);
+    const result = await invoke(config.functionName, payload, {
+      successMessage: `${config.label} sent to ${recipient}`,
+      errorMessage: `Failed to send ${config.label}`,
+    });
+    if (result !== null) {
       setSubject("");
       setBody("");
       setOpen(false);
-      refresh();
-    } catch {
-      notify(`Failed to send ${config.label}`, { type: "error" });
-    } finally {
-      setSending(false);
     }
   };
 

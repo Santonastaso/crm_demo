@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from "react";
-import get from "lodash/get";
+import get from "@/lib/get";
 import {
   type ExtractRecordPaths,
   type HintedString,

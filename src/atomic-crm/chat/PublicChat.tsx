@@ -1,111 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Loader2, MessageCircle } from "lucide-react";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-import type { ChatMessage } from "./chatTypes";
-
-async function sendChatMessage(
-  message: string,
-  conversationId: number | null,
-  projectId: number | null,
-): Promise<{ conversation_id: number; response: string }> {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify({
-      message,
-      conversation_id: conversationId,
-      project_id: projectId,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Request failed" }));
-    throw new Error(err.message ?? "Request failed");
-  }
-
-  return res.json();
-}
+import { useChatMessages } from "./useChatMessages";
 
 export const PublicChat = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<number | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Read optional project_id from URL params
   const params = new URLSearchParams(window.location.search);
   const projectId = params.get("project_id")
     ? Number(params.get("project_id"))
     : null;
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: "user",
-      content: input.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const data = await sendChatMessage(
-        userMessage.content,
-        conversationId,
-        projectId,
-      );
-
-      if (data.conversation_id && !conversationId) {
-        setConversationId(data.conversation_id);
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          content:
-            data.response ??
-            "I apologize, I was unable to process your request.",
-          timestamp: new Date(),
-        },
-      ]);
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Something went wrong";
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `error-${Date.now()}`,
-          sender: "ai",
-          content: errorMsg,
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { messages, input, setInput, isLoading, send, messagesEndRef } =
+    useChatMessages(projectId);
 
   return (
     <div
@@ -237,7 +140,7 @@ export const PublicChat = () => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Scrivi un messaggio..."
             disabled={isLoading}
             style={{
@@ -250,7 +153,7 @@ export const PublicChat = () => {
             }}
           />
           <button
-            onClick={handleSend}
+            onClick={send}
             disabled={!input.trim() || isLoading}
             style={{
               padding: "10px 16px",

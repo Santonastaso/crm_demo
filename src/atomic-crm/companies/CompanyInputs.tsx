@@ -11,7 +11,8 @@ import { required, useRecordContext } from "ra-core";
 import ImageEditorField from "../misc/ImageEditorField";
 import { isLinkedinUrl } from "../misc/isLinkedInUrl";
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import type { Company, Sale } from "../types";
+import { saleOptionRenderer } from "../consts";
+import type { Company } from "../types";
 import { sizes } from "./sizes";
 
 const isUrl = (url: string) => {
@@ -156,6 +157,3 @@ const CompanyAccountManagerInput = () => {
     </div>
   );
 };
-
-const saleOptionRenderer = (choice: Sale) =>
-  `${choice.first_name} ${choice.last_name}`;

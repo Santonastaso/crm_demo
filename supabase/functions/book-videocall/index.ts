@@ -3,6 +3,21 @@ import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
 import { getContactById, contactFullName, primaryEmail } from "../_shared/contactUtils.ts";
+import { DEFAULT_EVENT_TYPE_ID, SLOTS_LOOKAHEAD_DAYS } from "../_shared/constants.ts";
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+
+interface BookVideocallBody {
+  action?: string;
+  contact_id?: number;
+  conversation_id?: number;
+  sales_id?: number;
+  date?: string;
+  preferred_time?: string;
+  event_type_id?: number;
+  name?: string;
+  email?: string;
+  notes?: string;
+}
 
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
@@ -16,6 +31,8 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(500, "Cal.com API key not configured");
   }
 
+  const parsed = await parseJsonBody<BookVideocallBody>(req);
+  if (!parsed.ok) return parsed.response;
   const {
     action,
     contact_id,
@@ -27,7 +44,7 @@ Deno.serve(async (req: Request) => {
     name,
     email,
     notes,
-  } = await req.json();
+  } = parsed.data;
 
   // Resolve contact name/email from DB if contact_id provided
   let contactName = name ?? "Prospect";
@@ -51,11 +68,11 @@ Deno.serve(async (req: Request) => {
   // Action: "slots" — return available slots
   if (action === "slots" || !date) {
     const startDate = new Date().toISOString().split("T")[0];
-    const endDate = new Date(Date.now() + 7 * 86400000)
+    const endDate = new Date(Date.now() + SLOTS_LOOKAHEAD_DAYS * 86400000)
       .toISOString()
       .split("T")[0];
 
-    const slotsUrl = `${calcomBaseUrl}/slots?apiKey=${calcomApiKey}&startTime=${startDate}T00:00:00.000Z&endTime=${endDate}T23:59:59.000Z&eventTypeId=${event_type_id ?? 4777077}`;
+    const slotsUrl = `${calcomBaseUrl}/slots?apiKey=${calcomApiKey}&startTime=${startDate}T00:00:00.000Z&endTime=${endDate}T23:59:59.000Z&eventTypeId=${event_type_id ?? DEFAULT_EVENT_TYPE_ID}`;
 
     const slotsResponse = await fetch(slotsUrl);
     const slotsData = await slotsResponse.json();
@@ -88,7 +105,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const bookingPayload = {
-    eventTypeId: event_type_id ?? 4777077,
+    eventTypeId: event_type_id ?? DEFAULT_EVENT_TYPE_ID,
     start: startTime,
     language: "it",
     responses: {

@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { Identifier, OptionText } from "ra-core";
 import { useTranslate } from "ra-core";
-import set from "lodash/set";
+import set from "@/lib/set";
 
 /**
  * This hook provides support for suggestion creation in inputs which have choices.

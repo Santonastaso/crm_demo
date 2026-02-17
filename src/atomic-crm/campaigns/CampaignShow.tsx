@@ -3,8 +3,6 @@ import {
   useShowContext,
   useGetList,
   useGetOne,
-  useNotify,
-  useRefresh,
 } from "ra-core";
 import { ReferenceField, TextField } from "@/components/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Play, BarChart3, FileText } from "lucide-react";
 import type { Campaign, CampaignSend, Template } from "../types";
 import { CampaignMetrics } from "./CampaignMetrics";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 
 export const CampaignShow = () => (
   <ShowBase>
@@ -23,8 +21,7 @@ export const CampaignShow = () => (
 
 const CampaignShowContent = () => {
   const { record, isPending } = useShowContext<Campaign>();
-  const notify = useNotify();
-  const refresh = useRefresh();
+  const { invoke } = useInvokeFunction();
 
   const { data: sends = [] } = useGetList<CampaignSend>("campaign_sends", {
     pagination: { page: 1, perPage: 1000 },
@@ -33,18 +30,11 @@ const CampaignShowContent = () => {
 
   if (isPending || !record) return null;
 
-  const handleSend = async () => {
-    try {
-      const { error } = await supabase.functions.invoke("campaign-send", {
-        method: "POST",
-        body: { campaign_id: record.id },
-      });
-      if (error) throw error;
-      notify("Campaign sending initiated");
-      refresh();
-    } catch {
-      notify("Failed to start campaign send", { type: "error" });
-    }
+  const handleSend = () => {
+    invoke("campaign-send", { campaign_id: record.id }, {
+      successMessage: "Campaign sending initiated",
+      errorMessage: "Failed to start campaign send",
+    });
   };
 
   return (

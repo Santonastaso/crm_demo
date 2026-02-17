@@ -1,5 +1,5 @@
 import React, { Children, useCallback, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useMatch } from 'react-router';
 import { LogOut, Settings, User, LoaderCircle, RotateCw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -113,27 +113,23 @@ export function UserMenu({ children, user, onLogout }: UserMenuProps) {
   );
 }
 
-// NavigationTab Component
-const NavigationTab = ({
-  label,
-  to,
-  isActive,
-}: {
-  label: string;
-  to: string;
-  isActive: boolean;
-}) => (
-  <Link
-    to={to}
-    className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-      isActive
-        ? "text-secondary-foreground border-secondary-foreground"
-        : "text-secondary-foreground/70 border-transparent hover:text-secondary-foreground/80"
-    }`}
-  >
-    {label}
-  </Link>
-);
+// NavigationTab Component (vertical)
+const NavigationTab = ({ label, to }: { label: string; to: string }) => {
+  const match = useMatch({ path: to, end: to === '/' });
+  const isActive = !!match;
+  return (
+    <Link
+      to={to}
+      className={`block px-4 py-2 text-sm font-medium transition-colors rounded-md ${
+        isActive
+          ? "bg-secondary-foreground/10 text-secondary-foreground"
+          : "text-secondary-foreground/70 hover:text-secondary-foreground/80 hover:bg-secondary-foreground/5"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+};
 
 // UsersMenu Component
 const UsersMenu = () => {
@@ -165,11 +161,7 @@ export interface ExactHeaderProps {
   title: string;
   darkModeLogo?: string;
   lightModeLogo?: string;
-  navigationItems?: Array<{
-    label: string;
-    to: string;
-    isActive?: boolean;
-  }>;
+  navigationItems?: Array<{ label: string; to: string }>;
   user?: {
     name?: string;
     email?: string;
@@ -191,54 +183,33 @@ export const ExactHeader: React.FC<ExactHeaderProps> = ({
   loading = false,
 }) => {
   return (
-    <nav className="flex-grow">
-      <header className="bg-secondary">
-        <div className="px-4">
-          <div className="flex justify-between items-center flex-1 h-12">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-secondary-foreground no-underline"
-            >
-              {darkModeLogo && (
-                <img
-                  className="[.light_&]:hidden h-6"
-                  src={darkModeLogo}
-                  alt={title}
-                />
-              )}
-              {lightModeLogo && (
-                <img
-                  className="[.dark_&]:hidden h-6"
-                  src={lightModeLogo}
-                  alt={title}
-                />
-              )}
-              <h1 className="text-xl font-semibold">{title}</h1>
-            </Link>
-            <div className="flex-1 flex justify-center">
-              <nav className="flex">
-                {navigationItems.map((item) => (
-                  <NavigationTab
-                    key={item.to}
-                    label={item.label}
-                    to={item.to}
-                    isActive={item.isActive || false}
-                  />
-                ))}
-              </nav>
-            </div>
-            <div className="flex items-center">
-              <ThemeSwitch />
-              <RefreshButton onRefresh={onRefresh} loading={loading} />
-              <UserMenu user={user} onLogout={onLogout}>
-                <ConfigurationMenu />
-                <UsersMenu />
-              </UserMenu>
-            </div>
-          </div>
-        </div>
-      </header>
-    </nav>
+    <aside className="w-52 shrink-0 bg-secondary flex flex-col h-screen">
+      <Link
+        to="/"
+        className="flex items-center gap-2 p-4 text-secondary-foreground no-underline border-b border-secondary-foreground/10"
+      >
+        {darkModeLogo && (
+          <img className="[.light_&]:hidden h-6" src={darkModeLogo} alt={title} />
+        )}
+        {lightModeLogo && (
+          <img className="[.dark_&]:hidden h-6" src={lightModeLogo} alt={title} />
+        )}
+        <h1 className="text-lg font-semibold truncate">{title}</h1>
+      </Link>
+      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {navigationItems.map((item) => (
+          <NavigationTab key={item.to} label={item.label} to={item.to} />
+        ))}
+      </nav>
+      <div className="p-2 border-t border-secondary-foreground/10 flex items-center gap-1">
+        <ThemeSwitch />
+        <RefreshButton onRefresh={onRefresh} loading={loading} />
+        <UserMenu user={user} onLogout={onLogout}>
+          <ConfigurationMenu />
+          <UsersMenu />
+        </UserMenu>
+      </div>
+    </aside>
   );
 };
 

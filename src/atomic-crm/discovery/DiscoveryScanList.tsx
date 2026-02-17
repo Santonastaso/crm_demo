@@ -6,27 +6,17 @@ import {
   TextField,
 } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
-import { useRecordContext, useNotify, useRefresh } from "ra-core";
-import { Badge } from "@/components/ui/badge";
+import { useRecordContext } from "ra-core";
 import { Button } from "@/components/ui/button";
 import { Play, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
+import { StatusBadge, type StatusMap } from "@/atomic-crm/misc/StatusBadge";
 
-const StatusBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  const variants: Record<string, "default" | "destructive" | "secondary" | "outline"> = {
-    pending: "outline",
-    running: "secondary",
-    completed: "default",
-    failed: "destructive",
-  };
-  return (
-    <Badge variant={variants[record.status] ?? "outline"}>
-      {record.status}
-    </Badge>
-  );
+const scanStatusMap: StatusMap = {
+  pending: "outline",
+  running: "secondary",
+  completed: "default",
+  failed: "destructive",
 };
 
 const ProjectName = () => {
@@ -41,9 +31,7 @@ const ProjectName = () => {
 
 const RunScanButton = () => {
   const record = useRecordContext();
-  const notify = useNotify();
-  const refresh = useRefresh();
-  const [loading, setLoading] = useState(false);
+  const { invoke, loading } = useInvokeFunction();
 
   if (!record || record.status === "completed" || record.status === "running") {
     return null;
@@ -51,20 +39,10 @@ const RunScanButton = () => {
 
   const handleRun = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLoading(true);
-    try {
-      const { error } = await supabase.functions.invoke("discovery-scan", {
-        method: "POST",
-        body: { scan_id: record.id },
-      });
-      if (error) throw error;
-      notify("Scan started successfully");
-      refresh();
-    } catch {
-      notify("Failed to start scan", { type: "error" });
-    } finally {
-      setLoading(false);
-    }
+    await invoke("discovery-scan", { scan_id: record.id }, {
+      successMessage: "Scan started successfully",
+      errorMessage: "Failed to start scan",
+    });
   };
 
   return (
@@ -92,7 +70,7 @@ export const DiscoveryScanList = () => (
       </DataTable.Col>
       <DataTable.Col source="radius_km" label="Radius (km)" />
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={scanStatusMap} />
       </DataTable.Col>
       <DataTable.Col source="created_at" label="Created" />
       <DataTable.Col source="id" label="Actions">

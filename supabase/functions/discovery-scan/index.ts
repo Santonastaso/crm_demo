@@ -1,96 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
+import { fetchJson } from "../_shared/fetchJson.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
+import { type ScoringCriteria, computeScore, adaptPlace } from "../_shared/discoveryUtils.ts";
 
 const PLACES_API_NEW = "https://places.googleapis.com/v1/places:searchNearby";
-
-interface ScoringCriteria {
-  sector_weight: number;
-  size_weight: number;
-  proximity_weight: number;
-  activity_weight: number;
-}
-
-function computeScore(
-  place: Record<string, any>,
-  criteria: ScoringCriteria,
-  centerLat: number,
-  centerLng: number,
-  targetSectors: string[],
-): { score: number; explanation: string } {
-  let score = 0;
-  const factors: string[] = [];
-  const totalWeight =
-    (criteria.sector_weight ?? 25) +
-    (criteria.size_weight ?? 25) +
-    (criteria.proximity_weight ?? 25) +
-    (criteria.activity_weight ?? 25);
-
-  // Sector match
-  const types = place.types ?? [];
-  const sectorMatch = targetSectors.some(
-    (s) => types.includes(s) || (place.name ?? "").toLowerCase().includes(s),
-  );
-  if (sectorMatch) {
-    const sectorScore = (criteria.sector_weight / totalWeight) * 100;
-    score += sectorScore;
-    factors.push(`Sector match (+${Math.round(sectorScore)})`);
-  }
-
-  // Size signals from rating count
-  const ratingCount = place.user_ratings_total ?? 0;
-  let sizeScore = 0;
-  if (ratingCount > 500) sizeScore = 1;
-  else if (ratingCount > 100) sizeScore = 0.7;
-  else if (ratingCount > 20) sizeScore = 0.4;
-  else sizeScore = 0.1;
-  const sizePoints = sizeScore * (criteria.size_weight / totalWeight) * 100;
-  score += sizePoints;
-  factors.push(`${ratingCount} reviews, size signal (+${Math.round(sizePoints)})`);
-
-  // Proximity
-  const placeLat = place.geometry?.location?.lat ?? centerLat;
-  const placeLng = place.geometry?.location?.lng ?? centerLng;
-  const distance = haversine(centerLat, centerLng, placeLat, placeLng);
-  const proximityScore = Math.max(0, 1 - distance / 50);
-  const proximityPoints =
-    proximityScore * (criteria.proximity_weight / totalWeight) * 100;
-  score += proximityPoints;
-  factors.push(
-    `${distance.toFixed(1)}km away (+${Math.round(proximityPoints)})`,
-  );
-
-  // Activity (rating as proxy)
-  const rating = place.rating ?? 0;
-  const activityScore = rating / 5;
-  const activityPoints =
-    activityScore * (criteria.activity_weight / totalWeight) * 100;
-  score += activityPoints;
-  factors.push(`Rating ${rating}/5 (+${Math.round(activityPoints)})`);
-
-  return {
-    score: Math.min(100, Math.round(score)),
-    explanation: factors.join(", "),
-  };
-}
-
-function haversine(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
@@ -101,7 +17,9 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(500, "GOOGLE_MAPS_API_KEY not configured");
   }
 
-  const { scan_id } = await req.json();
+  const parsed = await parseJsonBody<{ scan_id?: number }>(req);
+  if (!parsed.ok) return parsed.response;
+  const { scan_id } = parsed.data;
 
   if (!scan_id) {
     return createErrorResponse(400, "scan_id is required");
@@ -149,7 +67,12 @@ Deno.serve(async (req: Request) => {
       requestBody.includedTypes = targetSectors;
     }
 
-    const response = await fetch(PLACES_API_NEW, {
+    interface PlacesApiResponse {
+      places?: Record<string, any>[];
+      error?: unknown;
+    }
+
+    const result = await fetchJson<PlacesApiResponse>(PLACES_API_NEW, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -159,30 +82,16 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(requestBody),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(`Google Places API error: ${JSON.stringify(data.error ?? data)}`);
+    if (!result.ok) {
+      throw new Error(`Google Places API error: ${JSON.stringify(result.data)}`);
     }
 
-    const places: Record<string, any>[] = data.places ?? [];
+    const places: Record<string, any>[] = result.data.places ?? [];
 
-    // Process and score each place (adapt to new API shape)
+    // Process and score each place
     const prospects = places.map(
       (place: Record<string, any>) => {
-        const adapted = {
-          name: place.displayName?.text ?? "Unknown",
-          types: place.types ?? [],
-          vicinity: place.shortFormattedAddress ?? place.formattedAddress ?? "",
-          geometry: {
-            location: {
-              lat: place.location?.latitude,
-              lng: place.location?.longitude,
-            },
-          },
-          rating: place.rating ?? 0,
-          user_ratings_total: place.userRatingCount ?? 0,
-        };
+        const adapted = adaptPlace(place);
 
         const { score, explanation } = computeScore(
           adapted,

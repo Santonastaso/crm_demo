@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { corsHeaders, createErrorResponse, createJsonResponse } from "../_shared/utils.ts";
 import { generateEmbedding } from "../_shared/embeddings.ts";
 import { requirePost } from "../_shared/requestHandler.ts";
+import { parseJsonBody } from "../_shared/parseJsonBody.ts";
 import { extractText, getDocumentProxy } from "npm:unpdf";
 
 const CHUNK_SIZE = 1000;
@@ -25,7 +26,9 @@ Deno.serve(async (req: Request) => {
   const earlyResponse = requirePost(req);
   if (earlyResponse) return earlyResponse;
 
-  const { document_id } = await req.json();
+  const parsed = await parseJsonBody<{ document_id?: number }>(req);
+  if (!parsed.ok) return parsed.response;
+  const { document_id } = parsed.data;
 
   if (!document_id) {
     return createErrorResponse(400, "document_id is required");

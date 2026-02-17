@@ -15,7 +15,7 @@ import {
 import { SimpleFormIterator } from "@/components/admin";
 import { isLinkedinUrl } from "../misc/isLinkedInUrl";
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import type { Sale } from "../types";
+import { LEAD_TYPES, saleOptionRenderer } from "../consts";
 import { Avatar } from "./Avatar";
 import { AutocompleteCompanyInput } from "@/atomic-crm/companies/AutocompleteCompanyInput.tsx";
 
@@ -177,13 +177,6 @@ const ContactPersonalInformationInputs = () => {
 
 const personalInfoTypes = [{ id: "Work" }, { id: "Home" }, { id: "Other" }];
 
-const LEAD_TYPE_CHOICES = [
-  { id: "investitore", name: "Investitore" },
-  { id: "prima_casa", name: "Prima Casa" },
-  { id: "upgrade", name: "Upgrade" },
-  { id: "secondo_immobile", name: "Secondo Immobile" },
-];
-
 const ContactMiscInputs = () => {
   return (
     <div className="flex flex-col gap-4">
@@ -191,7 +184,7 @@ const ContactMiscInputs = () => {
       <SelectInput
         source="lead_type"
         label="Lead Type"
-        choices={LEAD_TYPE_CHOICES}
+        choices={LEAD_TYPES}
         helperText={false}
       />
       <TextInput
@@ -219,6 +212,3 @@ const ContactMiscInputs = () => {
     </div>
   );
 };
-
-const saleOptionRenderer = (choice: Sale) =>
-  `${choice.first_name} ${choice.last_name}`;

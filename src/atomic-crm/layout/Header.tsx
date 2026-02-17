@@ -10,7 +10,7 @@ const Header = () => {
   const logout = useLogout();
 
   const navigationItems = [
-    { label: 'Dashboard', to: '/', isActive: true },
+    { label: 'Dashboard', to: '/' },
     { label: 'Contacts', to: '/contacts' },
     { label: 'Companies', to: '/companies' },
     { label: 'Deals', to: '/deals' },

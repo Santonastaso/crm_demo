@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, X, Loader2, Check } from "lucide-react";
 import { useState, useCallback } from "react";
-import { useNotify, useRefresh, useGetIdentity } from "ra-core";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useNotify, useGetIdentity } from "ra-core";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
+import { formatSlotTime, DEFAULT_FALLBACK_EMAIL } from "../consts";
 import type { Contact } from "../types";
 
 interface Slot {
@@ -21,38 +22,28 @@ export const ContactBookAppointment = ({
 }: ContactBookAppointmentProps) => {
   const [open, setOpen] = useState(false);
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [booking, setBooking] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const notify = useNotify();
-  const refresh = useRefresh();
+  const { invoke, loading } = useInvokeFunction();
   const { data: identity } = useGetIdentity();
 
   const fetchSlots = useCallback(async () => {
-    setLoading(true);
     setSlots([]);
     setSelectedSlot(null);
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "book-videocall",
-        {
-          method: "POST",
-          body: { action: "slots" },
-        },
-      );
-      if (error) throw error;
+    const data = await invoke<{ slots?: Slot[] }>(
+      "book-videocall",
+      { action: "slots" },
+      { autoRefresh: false, errorMessage: "Failed to fetch available slots" },
+    );
+    if (data !== null) {
       setSlots(data?.slots ?? []);
       if (!data?.slots?.length) {
         notify("No available slots found in the next 7 days", {
           type: "warning",
         });
       }
-    } catch {
-      notify("Failed to fetch available slots", { type: "error" });
-    } finally {
-      setLoading(false);
     }
-  }, [notify]);
+  }, [invoke, notify]);
 
   const handleOpen = () => {
     setOpen(true);
@@ -61,41 +52,32 @@ export const ContactBookAppointment = ({
 
   const handleBook = async () => {
     if (!selectedSlot) return;
-    setBooking(true);
 
     const emails = contact.email_jsonb ?? [];
     const primaryEmail = emails[0]?.email ?? "";
     const contactName =
       `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim();
 
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "book-videocall",
-        {
-          method: "POST",
-          body: {
-            action: "book",
-            date: selectedSlot.date,
-            preferred_time: selectedSlot.time,
-            contact_id: contact.id,
-            sales_id: identity?.id,
-            name: contactName || "Contact",
-            email: primaryEmail || "noreply@crm.local",
-          },
-        },
-      );
-      if (error) throw error;
-      notify(
-        `Appointment booked for ${selectedSlot.date} at ${selectedSlot.time}`,
-      );
+    const data = await invoke(
+      "book-videocall",
+      {
+        action: "book",
+        date: selectedSlot.date,
+        preferred_time: selectedSlot.time,
+        contact_id: contact.id,
+        sales_id: identity?.id,
+        name: contactName || "Contact",
+        email: primaryEmail || DEFAULT_FALLBACK_EMAIL,
+      },
+      {
+        successMessage: `Appointment booked for ${selectedSlot.date} at ${formatSlotTime(selectedSlot.time)}`,
+        errorMessage: "Failed to book appointment",
+      },
+    );
+    if (data !== null) {
       setOpen(false);
       setSelectedSlot(null);
       setSlots([]);
-      refresh();
-    } catch {
-      notify("Failed to book appointment", { type: "error" });
-    } finally {
-      setBooking(false);
     }
   };
 
@@ -113,7 +95,6 @@ export const ContactBookAppointment = ({
     );
   }
 
-  // Group slots by date
   const slotsByDate = slots.reduce<Record<string, Slot[]>>((acc, slot) => {
     if (!acc[slot.date]) acc[slot.date] = [];
     acc[slot.date].push(slot);
@@ -173,9 +154,7 @@ export const ContactBookAppointment = ({
                         className="cursor-pointer hover:bg-primary/10 transition-colors"
                         onClick={() => setSelectedSlot(slot)}
                       >
-                        {slot.time.includes("T")
-                          ? new Date(slot.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                          : slot.time}
+                        {formatSlotTime(slot.time)}
                       </Badge>
                     );
                   })}
@@ -191,17 +170,15 @@ export const ContactBookAppointment = ({
               Selected:{" "}
               <span className="font-medium">
                 {new Date(selectedSlot.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })} at{" "}
-                {selectedSlot.time.includes("T")
-                  ? new Date(selectedSlot.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                  : selectedSlot.time}
+                {formatSlotTime(selectedSlot.time)}
               </span>
             </p>
             <Button
               size="sm"
               onClick={handleBook}
-              disabled={booking}
+              disabled={loading}
             >
-              {booking ? (
+              {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-1" />
               ) : (
                 <Check className="h-4 w-4 mr-1" />

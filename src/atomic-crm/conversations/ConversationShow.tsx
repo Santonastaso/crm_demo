@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { formatDistance } from "date-fns";
 import { UserCheck, Send, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
+import { TIMELINE_PAGE_SIZE } from "../consts";
 import type { Conversation, Message, Contact } from "../types";
 
 export const ConversationShow = () => (
@@ -29,6 +30,7 @@ const ConversationShowContent = () => {
   const [create] = useCreate();
   const notify = useNotify();
   const refresh = useRefresh();
+  const { invoke } = useInvokeFunction();
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -36,7 +38,7 @@ const ConversationShowContent = () => {
   const { data: messages = [] } = useGetList<Message>(
     "messages",
     {
-      pagination: { page: 1, perPage: 100 },
+      pagination: { page: 1, perPage: TIMELINE_PAGE_SIZE },
       sort: { field: "created_at", order: "ASC" },
       filter: record?.id ? { conversation_id: record.id } : {},
     },
@@ -80,40 +82,23 @@ const ConversationShowContent = () => {
         },
       });
 
-      // For WhatsApp/SMS, send via the backend (which also logs to communication_log)
-      if (record.channel === "whatsapp" && record.contact_id) {
+      const channelFnMap: Record<string, string> = {
+        whatsapp: "whatsapp-send",
+        sms: "sms-send",
+      };
+      const sendFn = channelFnMap[record.channel];
+
+      if (sendFn && record.contact_id) {
         const contactPhone = (contact?.phone_jsonb ?? [])[0]?.number ?? "";
         if (contactPhone) {
-          const { error } = await supabase.functions.invoke("whatsapp-send", {
-            method: "POST",
-            body: {
-              to: contactPhone,
-              message: text,
-              contact_id: record.contact_id,
-              project_id: record.project_id ?? null,
-            },
-          });
-          if (error) {
-            console.error("WhatsApp send error:", error);
-          }
+          await invoke(sendFn, {
+            to: contactPhone,
+            message: text,
+            contact_id: record.contact_id,
+            project_id: record.project_id ?? null,
+          }, { autoRefresh: false });
         } else {
           notify("No phone number found for this contact", { type: "warning" });
-        }
-      } else if (record.channel === "sms" && record.contact_id) {
-        const contactPhone = (contact?.phone_jsonb ?? [])[0]?.number ?? "";
-        if (contactPhone) {
-          const { error } = await supabase.functions.invoke("sms-send", {
-            method: "POST",
-            body: {
-              to: contactPhone,
-              message: text,
-              contact_id: record.contact_id,
-              project_id: record.project_id ?? null,
-            },
-          });
-          if (error) {
-            console.error("SMS send error:", error);
-          }
         }
       } else if (record.contact_id) {
         // For other channels (web_chat), log manually since there's no send function

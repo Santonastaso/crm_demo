@@ -6,9 +6,6 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as diacritic from "diacritic";
 import {
   useDataTableStoreContext,
   useStore,
@@ -334,10 +331,12 @@ const padRanks = (ranks: number[], length: number) =>
     Array.from({ length: length - ranks.length }, (_, i) => ranks.length + i),
   );
 
+const stripDiacritics = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const fieldLabelMatchesFilter = (fieldLabel: string, columnFilter?: string) =>
   columnFilter
-    ? diacritic
-        .clean(fieldLabel)
+    ? stripDiacritics(fieldLabel)
         .toLowerCase()
-        .includes(diacritic.clean(columnFilter).toLowerCase())
+        .includes(stripDiacritics(columnFilter).toLowerCase())
     : true;

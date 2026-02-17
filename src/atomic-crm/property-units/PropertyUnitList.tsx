@@ -1,19 +1,9 @@
 import { List, CreateButton, DataTable, ReferenceField, TextField } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
 import { useRecordContext } from "ra-core";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/atomic-crm/misc/StatusBadge";
 import { UNIT_STATUS_COLORS } from "./unitStatus";
 import { formatEUR } from "@/lib/formatPrice";
-
-const StatusBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  return (
-    <Badge variant={UNIT_STATUS_COLORS[record.status] ?? "outline"}>
-      {record.status}
-    </Badge>
-  );
-};
 
 const PriceField = () => {
   const record = useRecordContext();
@@ -52,7 +42,7 @@ export const PropertyUnitList = () => (
         <PriceField />
       </DataTable.Col>
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={UNIT_STATUS_COLORS} />
       </DataTable.Col>
     </DataTable>
   </List>

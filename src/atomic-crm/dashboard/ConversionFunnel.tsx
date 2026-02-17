@@ -2,13 +2,7 @@ import { useGetList } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Contact, Deal } from "../types";
 import { useConfigurationContext } from "../root/ConfigurationContext";
-
-const LEAD_TYPES = [
-  { id: "investitore", label: "Investitore" },
-  { id: "prima_casa", label: "Prima Casa" },
-  { id: "upgrade", label: "Upgrade" },
-  { id: "secondo_immobile", label: "Secondo Immobile" },
-];
+import { LEAD_TYPES } from "../consts";
 
 export const ConversionFunnel = () => {
   const { dealStages } = useConfigurationContext();

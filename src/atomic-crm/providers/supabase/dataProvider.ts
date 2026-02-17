@@ -38,6 +38,7 @@ const baseDataProvider = supabaseDataProvider({
   apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
   supabaseClient: supabase,
   sortOrder: "asc,desc.nullslast" as any,
+  primaryKeys: new Map([["segment_contacts", ["segment_id", "contact_id"]]]),
 });
 
 const processCompanyLogo = async (params: any) => {

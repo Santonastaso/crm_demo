@@ -1,6 +1,6 @@
 import type { OnDragEndResponder } from "@hello-pangea/dnd";
 import { DragDropContext } from "@hello-pangea/dnd";
-import isEqual from "lodash/isEqual";
+import isEqual from "@/lib/isEqual";
 import type { DataProvider } from "ra-core";
 import { useDataProvider, useGetList, useListContext } from "ra-core";
 import { useEffect, useState, useMemo } from "react";

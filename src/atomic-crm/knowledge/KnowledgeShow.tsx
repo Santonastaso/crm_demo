@@ -1,17 +1,11 @@
-import {
-  ShowBase,
-  useShowContext,
-  useGetList,
-  useNotify,
-  useRefresh,
-} from "ra-core";
+import { ShowBase, useShowContext, useGetList } from "ra-core";
 import { ReferenceField, TextField } from "@/components/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2, FileText, Hash, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 import type { KnowledgeDocument, DocumentChunk } from "../types";
 
 export const KnowledgeShow = () => (
@@ -22,9 +16,7 @@ export const KnowledgeShow = () => (
 
 const KnowledgeShowContent = () => {
   const { record, isPending } = useShowContext<KnowledgeDocument>();
-  const notify = useNotify();
-  const refresh = useRefresh();
-  const [reprocessing, setReprocessing] = useState(false);
+  const { invoke, loading: reprocessing } = useInvokeFunction();
   const [expandedChunk, setExpandedChunk] = useState<number | null>(null);
 
   const { data: chunks = [], isPending: chunksLoading } =
@@ -41,20 +33,10 @@ const KnowledgeShowContent = () => {
   if (isPending || !record) return null;
 
   const handleReprocess = async () => {
-    setReprocessing(true);
-    try {
-      const { error } = await supabase.functions.invoke("process-document", {
-        method: "POST",
-        body: { document_id: record.id },
-      });
-      if (error) throw error;
-      notify("Document reprocessing started");
-      refresh();
-    } catch {
-      notify("Failed to reprocess document", { type: "error" });
-    } finally {
-      setReprocessing(false);
-    }
+    await invoke("process-document", { document_id: record.id }, {
+      successMessage: "Document reprocessing started",
+      errorMessage: "Failed to reprocess document",
+    });
   };
 
   const statusVariant =

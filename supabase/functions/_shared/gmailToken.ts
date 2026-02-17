@@ -1,6 +1,12 @@
 import { supabaseAdmin } from "./supabaseAdmin.ts";
+import { fetchJson } from "./fetchJson.ts";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+
+interface GoogleTokenResponse {
+  access_token: string;
+  expires_in: number;
+}
 
 export async function refreshGoogleAccessToken(
   refreshToken: string,
@@ -10,7 +16,7 @@ export async function refreshGoogleAccessToken(
 
   if (!clientId || !clientSecret) return null;
 
-  const response = await fetch(GOOGLE_TOKEN_URL, {
+  const result = await fetchJson<GoogleTokenResponse>(GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -21,8 +27,8 @@ export async function refreshGoogleAccessToken(
     }),
   });
 
-  if (!response.ok) return null;
-  return await response.json();
+  if (!result.ok) return null;
+  return result.data;
 }
 
 export async function getValidGmailToken(

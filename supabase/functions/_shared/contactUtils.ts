@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "./supabaseAdmin.ts";
+import { CONTACT_QUERY_LIMIT } from "./constants.ts";
 
 export function primaryEmail(
   contact: { email_jsonb?: Array<{ email: string }> | null },
@@ -33,7 +34,7 @@ export async function findContactByPhone(phone: string): Promise<number | null> 
   const { data: contacts } = await supabaseAdmin
     .from("contacts")
     .select("id, phone_jsonb")
-    .limit(500);
+    .limit(CONTACT_QUERY_LIMIT);
 
   if (!contacts) return null;
 
@@ -49,12 +50,39 @@ export async function findContactByPhone(phone: string): Promise<number | null> 
   return null;
 }
 
+export async function findOrCreateContactByPhone(
+  phone: string,
+  displayName = "Unknown User",
+): Promise<number | null> {
+  const existing = await findContactByPhone(phone);
+  if (existing) return existing;
+
+  const nameParts = displayName.split(" ");
+  const { data: newContact } = await supabaseAdmin
+    .from("contacts")
+    .insert({
+      first_name: nameParts[0] ?? "Unknown",
+      last_name: nameParts.slice(1).join(" ") || "",
+      phone_jsonb: [{ number: phone, type: "Work" }],
+      email_jsonb: [],
+      status: "cold",
+      first_seen: new Date().toISOString(),
+      last_seen: new Date().toISOString(),
+      has_newsletter: false,
+      tags: [],
+    })
+    .select("id")
+    .single();
+
+  return newContact?.id ?? null;
+}
+
 export async function findContactByEmail(email: string): Promise<number | null> {
   const target = email.toLowerCase();
   const { data: contacts } = await supabaseAdmin
     .from("contacts")
     .select("id, email_jsonb")
-    .limit(500);
+    .limit(CONTACT_QUERY_LIMIT);
 
   if (!contacts) return null;
 

@@ -1,18 +1,10 @@
 import { List, CreateButton, DataTable } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
-import { useRecordContext } from "ra-core";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge, type StatusMap } from "@/atomic-crm/misc/StatusBadge";
 
-const StatusBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  const variant =
-    record.status === "processed"
-      ? "default"
-      : record.status === "error"
-        ? "destructive"
-        : "secondary";
-  return <Badge variant={variant}>{record.status}</Badge>;
+const knowledgeStatusMap: StatusMap = {
+  processed: "default",
+  error: "destructive",
 };
 
 export const KnowledgeList = () => (
@@ -30,7 +22,7 @@ export const KnowledgeList = () => (
       <DataTable.Col source="title" label="Title" />
       <DataTable.Col source="file_type" label="Type" />
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={knowledgeStatusMap} fallbackVariant="secondary" />
       </DataTable.Col>
       <DataTable.Col source="created_at" label="Uploaded" />
     </DataTable>

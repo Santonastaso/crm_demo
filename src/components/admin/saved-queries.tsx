@@ -1,7 +1,7 @@
 import { useListContext, useTranslate } from "ra-core";
 import type { ChangeEvent, FormEvent, ReactElement } from "react";
 import { useState } from "react";
-import isEqual from "lodash/isEqual";
+import isEqual from "@/lib/isEqual";
 
 import { Button } from "@/components/ui/button";
 import {

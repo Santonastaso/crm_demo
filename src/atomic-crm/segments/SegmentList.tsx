@@ -1,11 +1,10 @@
 import { List, CreateButton, DataTable } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
-import { useRecordContext, useNotify, useRefresh } from "ra-core";
+import { useRecordContext, useNotify } from "ra-core";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
+import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 
 const AutoRefreshBadge = () => {
   const record = useRecordContext();
@@ -27,26 +26,19 @@ const CriteriaCount = () => {
 const RefreshButton = () => {
   const record = useRecordContext();
   const notify = useNotify();
-  const refresh = useRefresh();
-  const [loading, setLoading] = useState(false);
+  const { invoke, loading } = useInvokeFunction();
 
   if (!record) return null;
 
   const handleRefresh = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("segments-refresh", {
-        method: "POST",
-        body: { segment_id: record.id },
-      });
-      if (error) throw error;
+    const data = await invoke<{ contact_count?: number }>(
+      "segments-refresh",
+      { segment_id: record.id },
+      { errorMessage: "Failed to refresh segment" },
+    );
+    if (data !== null) {
       notify(`Segment refreshed: ${data?.contact_count ?? 0} contacts matched`);
-      refresh();
-    } catch {
-      notify("Failed to refresh segment", { type: "error" });
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -9,7 +9,7 @@ import {
 import { i18nProvider as defaultI18nProvider } from "@/lib/i18nProvider";
 import { Layout } from "@/components/admin/layout";
 import { LoginPage } from "@/components/admin/login-page";
-import { Ready } from "@/components/admin/ready";
+const Ready = () => <div className="p-8 text-center text-muted-foreground">Ready</div>;
 import { ThemeProvider } from "@santonastaso/shared";
 import { AuthCallback } from "@/components/admin/authentication";
 

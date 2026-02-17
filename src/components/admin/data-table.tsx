@@ -34,7 +34,7 @@ import {
 } from "ra-core";
 import { useNavigate } from "react-router";
 import { ArrowDownAZ, ArrowUpZA } from "lucide-react";
-import get from "lodash/get";
+import get from "@/lib/get";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {

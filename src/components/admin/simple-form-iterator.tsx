@@ -1,4 +1,4 @@
-import get from "lodash/get";
+import get from "@/lib/get";
 import {
   FormDataConsumer,
   type RaRecord,

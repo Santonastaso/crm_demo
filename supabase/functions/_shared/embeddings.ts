@@ -1,5 +1,11 @@
+import { fetchJson } from "./fetchJson.ts";
+
 const OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 const EMBEDDING_MODEL = "text-embedding-3-small";
+
+interface OpenAIEmbeddingResponse {
+  data?: Array<{ embedding?: number[] }>;
+}
 
 export async function generateEmbedding(
   text: string,
@@ -10,7 +16,7 @@ export async function generateEmbedding(
     return null;
   }
 
-  const response = await fetch(OPENAI_EMBEDDINGS_URL, {
+  const result = await fetchJson<OpenAIEmbeddingResponse>(OPENAI_EMBEDDINGS_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${openaiKey}`,
@@ -19,11 +25,10 @@ export async function generateEmbedding(
     body: JSON.stringify({ model: EMBEDDING_MODEL, input: text }),
   });
 
-  if (!response.ok) {
-    console.error("OpenAI embeddings error:", await response.text());
+  if (!result.ok) {
+    console.error("OpenAI embeddings error:", result.data);
     return null;
   }
 
-  const result = await response.json();
-  return result.data?.[0]?.embedding ?? null;
+  return result.data.data?.[0]?.embedding ?? null;
 }

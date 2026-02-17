@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
-import { supabase } from "@/atomic-crm/providers/supabase/supabase";
-import type { ChatMessage } from "@/atomic-crm/chat/chatTypes";
+import { useState } from "react";
+import { useChatMessages } from "@/atomic-crm/chat/useChatMessages";
 
 interface ChatWidgetProps {
   projectId?: number;
@@ -18,84 +17,8 @@ export const ChatWidget = ({
   subtitle = "We typically reply within minutes",
 }: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<number | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: "user",
-      content: input.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("chat", {
-        method: "POST",
-        body: {
-          message: userMessage.content,
-          conversation_id: conversationId,
-          project_id: projectId,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.conversation_id && !conversationId) {
-        setConversationId(data.conversation_id);
-      }
-
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        sender: "ai",
-        content: data?.response ?? "I apologize, I was unable to process your request.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
-    } catch (err) {
-      let errorMessage = "Sorry, something went wrong. Please try again.";
-      if (err && typeof err === "object" && "context" in err && err.context instanceof Response) {
-        try {
-          const body = await (err.context as Response).json();
-          if (body && typeof body === "object" && "message" in body && typeof body.message === "string") {
-            errorMessage = body.message;
-          }
-        } catch {
-          // ignore parse errors
-        }
-      }
-      console.error("Chat error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `error-${Date.now()}`,
-          sender: "ai",
-          content: errorMessage,
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { messages, input, setInput, isLoading, send, messagesEndRef } =
+    useChatMessages(projectId);
 
   if (!isOpen) {
     return (
@@ -157,13 +80,13 @@ export const ChatWidget = ({
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder="Type a message..."
           disabled={isLoading}
           className="flex-1"
         />
         <Button
-          onClick={sendMessage}
+          onClick={send}
           disabled={!input.trim() || isLoading}
           size="icon"
         >

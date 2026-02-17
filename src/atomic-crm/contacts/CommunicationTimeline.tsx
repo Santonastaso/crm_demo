@@ -1,4 +1,5 @@
 import { useGetList, useRecordContext } from "ra-core";
+import { TIMELINE_PAGE_SIZE } from "../consts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format, formatDistance, isSameDay, parseISO } from "date-fns";
@@ -73,7 +74,7 @@ export const CommunicationTimeline = () => {
   const { data: logs = [], isLoading } = useGetList<CommunicationLog>(
     "communication_log",
     {
-      pagination: { page: 1, perPage: 100 },
+      pagination: { page: 1, perPage: TIMELINE_PAGE_SIZE },
       sort: { field: "created_at", order: "DESC" },
       filter: contact?.id ? { contact_id: contact.id } : {},
     },

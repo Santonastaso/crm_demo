@@ -2,8 +2,6 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useListContext, useTranslate } from "ra-core";
-import matches from "lodash/matches";
-import pickBy from "lodash/pickBy";
 import { CircleX } from "lucide-react";
 
 export const ToggleFilterButton = ({
@@ -38,10 +36,14 @@ export const ToggleFilterButton = ({
   );
 };
 
+const definedEntries = (obj: any) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => typeof v !== "undefined"));
+
+const shallowMatches = (pattern: any, target: any) =>
+  Object.keys(pattern).every((k) => target[k] === pattern[k]);
+
 const toggleFilter = (value: any, filters: any) => {
-  const isSelected = matches(
-    pickBy(value, (val) => typeof val !== "undefined"),
-  )(filters);
+  const isSelected = shallowMatches(definedEntries(value), filters);
 
   if (isSelected) {
     const keysToRemove = Object.keys(value);
@@ -56,4 +58,4 @@ const toggleFilter = (value: any, filters: any) => {
 };
 
 const getIsSelected = (value: any, filters: any) =>
-  matches(pickBy(value, (val) => typeof val !== "undefined"))(filters);
+  shallowMatches(definedEntries(value), filters);
