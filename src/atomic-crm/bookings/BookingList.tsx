@@ -1,25 +1,9 @@
 import { List, DataTable, ReferenceField, TextField } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
 import { useRecordContext } from "ra-core";
-import { Badge } from "@/components/ui/badge";
 import { Calendar, ExternalLink } from "lucide-react";
 import type { Booking } from "../types";
-
-const StatusBadge = () => {
-  const record = useRecordContext<Booking>();
-  if (!record) return null;
-  const variants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
-    confirmed: "default",
-    pending: "secondary",
-    cancelled: "destructive",
-    completed: "outline",
-  };
-  return (
-    <Badge variant={variants[record.status] ?? "outline"}>
-      {record.status}
-    </Badge>
-  );
-};
+import { StatusBadge } from "../misc/StatusBadge";
 
 const ScheduledAt = () => {
   const record = useRecordContext<Booking>();
@@ -72,7 +56,7 @@ export const BookingList = () => (
         <ScheduledAt />
       </DataTable.Col>
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={{ confirmed: "default", pending: "secondary", cancelled: "destructive", completed: "outline" }} />
       </DataTable.Col>
       <DataTable.Col source="sales_id" label="Agent">
         <ReferenceField source="sales_id" reference="sales" link={false}>

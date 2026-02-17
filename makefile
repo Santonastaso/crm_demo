@@ -23,9 +23,6 @@ start-app: ## start the app locally
 
 start: start-supabase start-app ## start the stack locally
 
-start-demo: ## start the app locally in demo mode
-	npm run dev:demo
-
 stop-supabase: ## stop local supabase
 	npx supabase stop
 
@@ -34,21 +31,11 @@ stop: stop-supabase ## stop the stack locally
 build: ## build the app
 	npm run build
 
-build-demo: ## build the app in demo mode
-	npm run build:demo
-
-build-lib: ## build the library
-	npm run build-lib
-
 prod-start: build supabase-deploy
 	open http://127.0.0.1:3000 && npx serve -l tcp://127.0.0.1:3000 dist
 
 prod-deploy: build supabase-deploy
 	npm run ghpages:deploy
-
-supabase-remote-init:
-	npm run supabase:remote:init
-	$(MAKE) supabase-deploy
 
 supabase-deploy:
 	npx supabase db push
@@ -63,13 +50,6 @@ test-ci:
 lint:
 	npm run lint:check
 	npm run prettier:check
-
-publish:
-	npm run build-lib
-	npm publish
-
-typecheck:
-	npm run typecheck
 
 doc-install:
 	@(cd doc && npm install)

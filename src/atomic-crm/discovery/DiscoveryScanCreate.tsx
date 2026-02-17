@@ -34,8 +34,9 @@ const SECTOR_CHOICES = [
 ];
 
 const ProjectLocationSync = () => {
-  const projectId = useWatch({ name: "project_id" });
+  const watchedProjectId = useWatch({ name: "project_id" });
   const { setValue, getValues } = useFormContext();
+  const projectId = watchedProjectId ?? getValues("project_id");
 
   const { data: project } = useGetOne(
     "projects",
@@ -44,15 +45,15 @@ const ProjectLocationSync = () => {
   );
 
   useEffect(() => {
-    if (project?.location_lat && project?.location_lng) {
-      const currentLat = getValues("center_lat");
-      const currentLng = getValues("center_lng");
-      if (!currentLat && !currentLng) {
-        setValue("center_lat", String(project.location_lat));
-        setValue("center_lng", String(project.location_lng));
-      }
+    if (
+      project &&
+      project.location_lat != null &&
+      project.location_lng != null
+    ) {
+      setValue("center_lat", String(project.location_lat));
+      setValue("center_lng", String(project.location_lng));
     }
-  }, [project, setValue, getValues]);
+  }, [project, projectId, setValue]);
 
   return null;
 };

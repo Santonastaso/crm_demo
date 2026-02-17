@@ -1,17 +1,6 @@
 import { List, CreateButton, DataTable } from "@/components/admin";
 import { TopToolbar } from "../layout/TopToolbar";
-import { useRecordContext } from "ra-core";
-import { Badge } from "@/components/ui/badge";
-
-const StatusBadge = () => {
-  const record = useRecordContext();
-  if (!record) return null;
-  return (
-    <Badge variant={record.status === "active" ? "default" : "secondary"}>
-      {record.status}
-    </Badge>
-  );
-};
+import { StatusBadge } from "../misc/StatusBadge";
 
 export const ProjectList = () => (
   <List
@@ -29,7 +18,7 @@ export const ProjectList = () => (
       <DataTable.Col source="slug" label="Slug" />
       <DataTable.Col source="location" label="Location" />
       <DataTable.Col source="status" label="Status">
-        <StatusBadge />
+        <StatusBadge source="status" map={{ active: "default" }} fallbackVariant="secondary" />
       </DataTable.Col>
     </DataTable>
   </List>
