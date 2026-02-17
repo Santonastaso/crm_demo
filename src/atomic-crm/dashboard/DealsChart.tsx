@@ -52,20 +52,20 @@ export const DealsChart = memo(() => {
         won: dealsByMonth[month]
           .filter((deal: Deal) => deal.stage === "won")
           .reduce((acc: number, deal: Deal) => {
-            acc += deal.amount;
+            acc += deal.amount || 0;
             return acc;
           }, 0),
         pending: dealsByMonth[month]
           .filter((deal: Deal) => !["won", "lost"].includes(deal.stage))
           .reduce((acc: number, deal: Deal) => {
             // @ts-expect-error - multiplier type issue
-            acc += deal.amount * multiplier[deal.stage];
+            acc += (deal.amount || 0) * multiplier[deal.stage];
             return acc;
           }, 0),
         lost: dealsByMonth[month]
           .filter((deal: Deal) => deal.stage === "lost")
           .reduce((acc: number, deal: Deal) => {
-            acc -= deal.amount;
+            acc -= deal.amount || 0;
             return acc;
           }, 0),
       };
@@ -75,6 +75,8 @@ export const DealsChart = memo(() => {
   }, [data]);
 
   if (isPending) return null; // FIXME return skeleton instead
+  if (!data || data.length === 0 || months.length === 0) return null;
+  
   const range = months.reduce(
     (acc, month) => {
       acc.min = Math.min(acc.min, month.lost);
