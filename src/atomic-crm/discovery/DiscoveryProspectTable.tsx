@@ -87,7 +87,7 @@ export const DiscoveryProspectTable = ({
             if (!prospect || prospect.contact_id) continue;
 
             const phoneEntries = prospect.phone
-              ? [{ number: prospect.phone, type: "work" }]
+              ? [{ number: prospect.phone, type: "Work" }]
               : [];
 
             const { data: contact } = await dataProvider.create("contacts", {
@@ -131,7 +131,8 @@ export const DiscoveryProspectTable = ({
 
         setSelected(new Set());
         refresh();
-      } catch {
+      } catch (err) {
+        console.error("Failed to update prospects:", err);
         notify("Failed to update prospects", { type: "error" });
       } finally {
         setBulkLoading(false);
@@ -272,7 +273,7 @@ const ProspectRow = ({
     setAdding(true);
     try {
       const phoneEntries = prospect.phone
-        ? [{ number: prospect.phone, type: "work" }]
+        ? [{ number: prospect.phone, type: "Work" }]
         : [];
 
       const { data: contact } = await dataProvider.create("contacts", {
@@ -300,7 +301,8 @@ const ProspectRow = ({
 
       notify("Prospect added to CRM");
       refresh();
-    } catch {
+    } catch (err) {
+      console.error("Failed to add prospect:", err);
       notify("Failed to add prospect", { type: "error" });
     } finally {
       setAdding(false);
