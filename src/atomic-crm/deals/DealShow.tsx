@@ -31,6 +31,7 @@ import { NoteCreate, NotesIterator } from "../notes";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
 import { ContactList } from "./ContactList";
+import { UnitList } from "./UnitList";
 import { findDealLabel } from "./deal";
 import {
   InteractionsList,
@@ -156,16 +157,14 @@ const DealShowContent = () => {
                   </span>
                 </div>
 
-                {record.unit_id && (
+                {!!record.unit_ids?.length && (
                   <div className="flex flex-col mr-10">
                     <span className="text-xs text-muted-foreground tracking-wide">
-                      Unit
+                      Units
                     </span>
-                    <ReferenceField source="unit_id" reference="property_units" link="show">
-                      <span className="text-sm font-mono">
-                        <TextField source="code" />
-                      </span>
-                    </ReferenceField>
+                    <ReferenceArrayField source="unit_ids" reference="property_units">
+                      <UnitList />
+                    </ReferenceArrayField>
                   </div>
                 )}
               </div>

@@ -3,12 +3,13 @@ import {
   useShowContext,
   useGetList,
   useGetOne,
+  useRedirect,
 } from "ra-core";
 import { ReferenceField, TextField } from "@/components/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, BarChart3, FileText } from "lucide-react";
+import { Play, Pencil, FileText } from "lucide-react";
 import type { Campaign, CampaignSend, Template } from "../types";
 import { CampaignMetrics } from "./CampaignMetrics";
 import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
@@ -21,6 +22,7 @@ export const CampaignShow = () => (
 
 const CampaignShowContent = () => {
   const { record, isPending } = useShowContext<Campaign>();
+  const redirect = useRedirect();
   const { invoke } = useInvokeFunction();
 
   const { data: sends = [] } = useGetList<CampaignSend>("campaign_sends", {
@@ -60,10 +62,20 @@ const CampaignShowContent = () => {
               {record.status}
             </Badge>
             {(record.status === "draft" || record.status === "scheduled") && (
-              <Button size="sm" onClick={handleSend}>
-                <Play className="h-4 w-4 mr-1" />
-                Send Now
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => redirect("edit", "campaigns", record.id)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" onClick={handleSend}>
+                  <Play className="h-4 w-4 mr-1" />
+                  Send Now
+                </Button>
+              </>
             )}
           </div>
         </CardHeader>

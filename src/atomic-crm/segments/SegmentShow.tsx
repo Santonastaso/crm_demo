@@ -3,11 +3,12 @@ import {
   useShowContext,
   useGetList,
   useNotify,
+  useRedirect,
 } from "ra-core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Loader2, Users } from "lucide-react";
+import { RefreshCw, Loader2, Users, Pencil } from "lucide-react";
 import { useInvokeFunction } from "@/atomic-crm/hooks/useInvokeFunction";
 import type { Segment, Contact } from "../types";
 
@@ -20,6 +21,7 @@ export const SegmentShow = () => (
 const SegmentShowContent = () => {
   const { record, isPending } = useShowContext<Segment>();
   const notify = useNotify();
+  const redirect = useRedirect();
   const { invoke, loading: refreshing } = useInvokeFunction();
 
   const { data: segmentContacts = [] } = useGetList(
@@ -77,19 +79,29 @@ const SegmentShowContent = () => {
                 ` · Last refreshed ${new Date(record.last_refreshed_at).toLocaleString()}`}
             </p>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-1" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-1" />
-            )}
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => redirect("edit", "segments", record.id)}
+            >
+              <Pencil className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
       </Card>
 

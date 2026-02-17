@@ -11,6 +11,7 @@ interface ResourceFormShellProps {
   saveLabel?: string;
   defaultValues?: Record<string, unknown>;
   mutationOptions?: Record<string, unknown>;
+  transform?: (data: Record<string, unknown>) => Record<string, unknown>;
 }
 
 export const ResourceFormShell = ({
@@ -21,10 +22,11 @@ export const ResourceFormShell = ({
   saveLabel,
   defaultValues,
   mutationOptions,
+  transform,
 }: ResourceFormShellProps) => {
   const Base = mode === "create" ? CreateBase : EditBase;
   return (
-    <Base redirect={redirect} mutationOptions={mutationOptions}>
+    <Base redirect={redirect} mutationOptions={mutationOptions} transform={transform}>
       <div className={`mt-2 max-w-${maxWidth} mx-auto`}>
         <Form defaultValues={defaultValues}>
           <Card>

@@ -131,7 +131,7 @@ export type Deal = {
   expected_closing_date: string;
   sales_id: Identifier;
   project_id?: Identifier;
-  unit_id?: Identifier;
+  unit_ids: Identifier[];
   index: number;
 } & Pick<RaRecord, "id">;
 
@@ -458,6 +458,7 @@ export type Campaign = {
   project_id?: Identifier;
   name: string;
   segment_id?: Identifier;
+  template_id?: Identifier;
   status: CampaignStatus;
   channel: CampaignChannel;
   created_at: string;

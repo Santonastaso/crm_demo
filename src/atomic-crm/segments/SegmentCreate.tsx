@@ -2,6 +2,7 @@ import { useGetIdentity } from "ra-core";
 import { ResourceFormShell } from "../layout/ResourceFormShell";
 import { SegmentInputs } from "./SegmentInputs";
 import { useSegmentRefreshOnSuccess } from "./useSegmentRefresh";
+import { stripCriteriaIds } from "./segmentTransform";
 
 export const SegmentCreate = () => {
   const { identity } = useGetIdentity();
@@ -13,6 +14,7 @@ export const SegmentCreate = () => {
       saveLabel="Create Segment"
       defaultValues={{ sales_id: identity?.id, criteria: [], auto_refresh: false }}
       mutationOptions={{ onSuccess }}
+      transform={stripCriteriaIds}
     >
       <SegmentInputs />
     </ResourceFormShell>

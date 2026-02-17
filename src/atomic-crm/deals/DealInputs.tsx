@@ -45,13 +45,13 @@ const DealInfoInputs = () => {
           helperText={false}
         />
       </ReferenceInput>
-      <ReferenceInput source="unit_id" reference="property_units">
-        <SelectInput
+      <ReferenceArrayInput source="unit_ids" reference="property_units">
+        <AutocompleteArrayInput
           optionText="code"
-          label="Property Unit"
+          label="Property Units"
           helperText={false}
         />
-      </ReferenceInput>
+      </ReferenceArrayInput>
     </div>
   );
 };
