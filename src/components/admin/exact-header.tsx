@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { ThemeSwitch } from '@santonastaso/shared';
+import { ThemeSwitch } from '@/components/theme/ThemeSwitch';
 
 // UserMenu Context
 export type UserMenuContextValue = {
